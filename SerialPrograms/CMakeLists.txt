@@ -1333,6 +1333,8 @@ file(GLOB MAIN_SOURCES
     Source/PokemonSV/Options/PokemonSV_EncounterBotCommon.h
     Source/PokemonSV/Options/PokemonSV_PlayerList.cpp
     Source/PokemonSV/Options/PokemonSV_PlayerList.h
+    Source/PokemonSV/Options/PokemonSV_SandwichMakerOption.cpp
+    Source/PokemonSV/Options/PokemonSV_SandwichMakerOption.h
     Source/PokemonSV/Options/PokemonSV_TeraAIOption.cpp
     Source/PokemonSV/Options/PokemonSV_TeraAIOption.h
     Source/PokemonSV/Options/PokemonSV_TeraMoveTable.cpp
@@ -1403,6 +1405,8 @@ file(GLOB MAIN_SOURCES
     Source/PokemonSV/Programs/PokemonSV_SaveGame.h
     Source/PokemonSV/Programs/Sandwiches/PokemonSV_IngredientSession.cpp
     Source/PokemonSV/Programs/Sandwiches/PokemonSV_IngredientSession.h
+    Source/PokemonSV/Programs/Sandwiches/PokemonSV_SandwichMaker.cpp
+    Source/PokemonSV/Programs/Sandwiches/PokemonSV_SandwichMaker.h
     Source/PokemonSV/Programs/Sandwiches/PokemonSV_SandwichRoutines.cpp
     Source/PokemonSV/Programs/Sandwiches/PokemonSV_SandwichRoutines.h
     Source/PokemonSV/Programs/ShinyHunting/PokemonSV_AreaZeroPlatform.cpp
@@ -1443,6 +1447,8 @@ file(GLOB MAIN_SOURCES
     Source/PokemonSV/Resources/PokemonSV_NameDatabase.h
     Source/PokemonSV/Resources/PokemonSV_PokemonSprites.cpp
     Source/PokemonSV/Resources/PokemonSV_PokemonSprites.h
+    Source/PokemonSV/Resources/PokemonSV_SandwichRecipes.cpp
+    Source/PokemonSV/Resources/PokemonSV_SandwichRecipes.h
     Source/PokemonSV/Resources/PokemonSV_TournamentPrizeNames.cpp
     Source/PokemonSV/Resources/PokemonSV_TournamentPrizeNames.h
     Source/PokemonSwSh/Commands/PokemonSwSh_Commands_AutoHosts.cpp
