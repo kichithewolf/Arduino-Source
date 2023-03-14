@@ -65,15 +65,24 @@ SandwichMakerOption::SandwichMakerOption()
         "Sparkling/Title/Encounter: Cucumber + Pickle + 3x ingredient + 2x Herba Mystica<br>"
         "Sparkling/Title/Humungo: ???",
         LockWhileRunning::UNLOCKED,
-        "love-ball"
+        "shiny-dragon"
         )
-        
 {
     PA_ADD_OPTION(MAX_NUM_SANDWICHES);
     PA_ADD_OPTION(SANDWICH_TYPE);
 
+    SandwichMakerOption::value_changed();
+
 }
 
+void SandwichMakerOption::value_changed() {
+    //ConfigOptionState builder = SANDWICH_TYPE == SandwichRecipes::shiny-dragon
+    ConfigOptionState builder = true
+        ? ConfigOptionState::DISABLED
+        : ConfigOptionState::ENABLED;
+
+    MAX_NUM_SANDWICHES.set_visibility(builder);
+}
 
 }
 }

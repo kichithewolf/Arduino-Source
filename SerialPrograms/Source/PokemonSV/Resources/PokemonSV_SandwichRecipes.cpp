@@ -37,7 +37,7 @@ SandwichRecipeDatabase::SandwichRecipeDatabase()
     JsonValue json_slugs = load_json_file(path_slugs);
     JsonArray& slugs = json_slugs.get_array_throw(path_slugs);
 
-    std::string path_disp = RESOURCE_PATH() + "PokemonSV/AAT/TournamentPrizeNameDisplay.json";
+    std::string path_disp = RESOURCE_PATH() + "PokemonSV/Picnic/SandwichRecipesDisplay.json";
     JsonValue json_disp = load_json_file(path_disp);
     JsonObject& item_disp = json_disp.get_object_throw(path_disp);
 

@@ -35,6 +35,7 @@ class SandwichMakerOption : public GroupOption {
 
 public:
     SandwichMakerOption();
+    virtual void value_changed();
 
 private:
     SimpleIntegerOption<uint64_t> MAX_NUM_SANDWICHES;
