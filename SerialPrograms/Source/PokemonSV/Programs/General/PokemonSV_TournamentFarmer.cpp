@@ -620,6 +620,18 @@ void TournamentFarmer::program(SingleSwitchProgramEnvironment& env, BotBaseConte
     STOP_AFTER_CURRENT.set_ready();
     ResetOnExit reset_button_on_exit(STOP_AFTER_CURRENT);
 
+    env.log("Reading money.");
+    int top_money = -1;
+    ImageFloatBox top_notif(0.745, 0.152, 0.206, 0.083);
+    ImageRGB32 image_top = to_blackwhite_rgb32_range(
+        extract_box_reference(ImageRGB32("./tournament-money-spanish.png"), top_notif),
+        combine_rgb(215, 215, 215), combine_rgb(255, 255, 255), true
+    );
+    image_top.save("./image_top.png");
+    top_money = OCR::read_money(env.console, image_top);
+    stats.money += top_money;
+    env.update_stats();
+
     /*
     Preconditions:
     Last Pokemon Center visited is Mesagzoa West
