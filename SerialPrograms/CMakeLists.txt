@@ -1342,6 +1342,8 @@ file(GLOB MAIN_SOURCES
     Source/PokemonSV/Options/PokemonSV_AuctionItemTable.cpp
     Source/PokemonSV/Options/PokemonSV_AuctionItemTable.h
     Source/PokemonSV/Options/PokemonSV_AutoHostOptions.h
+    Source/PokemonSV/Options/PokemonSV_BattleMoveTable.cpp
+    Source/PokemonSV/Options/PokemonSV_BattleMoveTable.h
     Source/PokemonSV/Options/PokemonSV_EggPowerSandwichOption.cpp
     Source/PokemonSV/Options/PokemonSV_EggPowerSandwichOption.h
     Source/PokemonSV/Options/PokemonSV_EncounterActionsTable.cpp
@@ -1407,6 +1409,8 @@ file(GLOB MAIN_SOURCES
     Source/PokemonSV/Programs/General/PokemonSV_SizeChecker.h
     Source/PokemonSV/Programs/General/PokemonSV_StatsReset.cpp
     Source/PokemonSV/Programs/General/PokemonSV_StatsReset.h
+    Source/PokemonSV/Programs/General/PokemonSV_StatsResetBloodmoon.cpp
+    Source/PokemonSV/Programs/General/PokemonSV_StatsResetBloodmoon.h
     Source/PokemonSV/Programs/General/PokemonSV_TournamentFarmer.cpp
     Source/PokemonSV/Programs/General/PokemonSV_TournamentFarmer.h
     Source/PokemonSV/Programs/Glitches/PokemonSV_CloneItems-1.0.1.cpp
