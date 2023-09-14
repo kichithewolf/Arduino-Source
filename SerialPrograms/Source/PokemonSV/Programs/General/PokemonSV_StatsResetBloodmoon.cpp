@@ -134,7 +134,6 @@ bool run_battle(ProgramEnvironment& env, ConsoleHandle& console, BotBaseContext&
             },
             {
                 battle_menu,
-                cheer_select_menu,
                 move_select_menu,
                 target_select_menu,
                 next_button,
