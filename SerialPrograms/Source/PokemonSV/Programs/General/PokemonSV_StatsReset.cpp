@@ -14,6 +14,7 @@
 #include "Pokemon/Pokemon_Strings.h"
 #include "PokemonSV/PokemonSV_Settings.h"
 #include "PokemonSV/Inference/Dialogs/PokemonSV_DialogDetector.h"
+#include "PokemonSV/Inference/Battles/PokemonSV_EncounterWatcher.h"
 #include "PokemonSV/Inference/Battles/PokemonSV_NormalBattleMenus.h"
 #include "PokemonSV/Inference/Boxes/PokemonSV_StatsResetChecker.h"
 #include "PokemonSV/Inference/Boxes/PokemonSV_BoxDetection.h"
@@ -48,18 +49,21 @@ struct StatsReset_Descriptor::Stats : public StatsTracker {
         , balls(m_stats["Balls Thrown"])
         , catches(m_stats["Catches"])
         , matches(m_stats["Matches"])
+        , shinies(m_stats["Shinies"])
         , errors(m_stats["Errors"])
     {
         m_display_order.emplace_back("Resets");
         m_display_order.emplace_back("Balls Thrown");
         m_display_order.emplace_back("Catches");
         m_display_order.emplace_back("Matches");
+        m_display_order.emplace_back("Shinies", HIDDEN_IF_ZERO);
         m_display_order.emplace_back("Errors", HIDDEN_IF_ZERO);
     }
     std::atomic<uint64_t>& resets;
     std::atomic<uint64_t>& balls;
     std::atomic<uint64_t>& catches;
     std::atomic<uint64_t>& matches;
+    std::atomic<uint64_t>& shinies;
     std::atomic<uint64_t>& errors;
 };
 std::unique_ptr<StatsTracker> StatsReset_Descriptor::make_stats() const {
@@ -96,6 +100,11 @@ StatsReset::StatsReset()
         LockMode::LOCK_WHILE_RUNNING,
         false
     )
+    , STOP_ON_SHINY(
+        "<b>Stop on Shiny:</b><br>Stop the program if a shiny is detected. Your lead must not be shiny, or it may cause a false positive. This setting requires Audio Input.",
+        LockMode::LOCK_WHILE_RUNNING,
+        true
+    )
     , FILTERS(
         StatsHuntIvJudgeFilterTable_Label_Regular,
         {
@@ -128,61 +137,103 @@ StatsReset::StatsReset()
         FILTERS.set_default(std::move(ret));
     }
     PA_ADD_OPTION(TARGET);
+    
     PA_ADD_OPTION(LANGUAGE); //This is required
     PA_ADD_OPTION(BALL_SELECT);
     PA_ADD_OPTION(QUICKBALL);
     PA_ADD_OPTION(BATTLE_MOVES);
+    PA_ADD_OPTION(STOP_ON_SHINY);
     PA_ADD_OPTION(FILTERS); //Note: None of these can be shiny, and the quartet will have some perfect IVs.
     PA_ADD_OPTION(GO_HOME_WHEN_DONE);
     PA_ADD_OPTION(NOTIFICATIONS);
 }
 
-void StatsReset::enter_battle(SingleSwitchProgramEnvironment& env, BotBaseContext& context) {
+//Return true if shiny detected, false if no shiny.
+bool StatsReset::enter_battle(SingleSwitchProgramEnvironment& env, BotBaseContext& context) {
     StatsReset_Descriptor::Stats& stats = env.current_stats<StatsReset_Descriptor::Stats>();
+    EncounterWatcher encounter_watcher(env.console, COLOR_RED);
 
-    //Press A to talk to target
-    AdvanceDialogWatcher advance_detector(COLOR_YELLOW);
-    pbf_press_button(context, BUTTON_A, 10, 50);
-    int retD = wait_until(env.console, context, Milliseconds(4000), { advance_detector });
-    if (retD < 0) {
-        env.log("Dialog not detected.");
-    }
-
-    switch (TARGET) {
-    case Target::TreasuresOfRuin:
-        //~30 seconds to start battle?
-        pbf_mash_button(context, BUTTON_A, 3250);
-        context.wait_for_all_requests();
-        break;
-    case Target::LoyalThree:
-        //Mash through dialog box
-        pbf_mash_button(context, BUTTON_B, 1300);
-        context.wait_for_all_requests();
-        break;
-    case Target::Generic:
-        //Mash A to initiate battle
-        pbf_mash_button(context, BUTTON_A, 90);
-        context.wait_for_all_requests();
-        break;
-    default:
-        throw InternalProgramError(&env.logger(), PA_CURRENT_FUNCTION, "Unknown Target");
-    }
-
-    NormalBattleMenuWatcher battle_menu(COLOR_YELLOW);
-    int ret = wait_until(
+    int ret = run_until(
         env.console, context,
-        std::chrono::seconds(15),
-        { battle_menu }
+        [&](BotBaseContext& context) {
+            //Press A to talk to target
+            AdvanceDialogWatcher advance_detector(COLOR_YELLOW);
+            pbf_press_button(context, BUTTON_A, 10, 50);
+            int retD = wait_until(env.console, context, Milliseconds(4000), { advance_detector });
+            if (retD < 0) {
+                env.log("Dialog not detected.");
+            }
+
+            switch (TARGET) {
+            case Target::TreasuresOfRuin:
+                //~30 seconds to start battle?
+                pbf_mash_button(context, BUTTON_A, 3250);
+                context.wait_for_all_requests();
+                break;
+            case Target::LoyalThree:
+                //Mash through dialog box
+                pbf_mash_button(context, BUTTON_B, 1300);
+                context.wait_for_all_requests();
+                break;
+            case Target::Generic:
+                //Mash A to initiate battle
+                pbf_mash_button(context, BUTTON_A, 90);
+                context.wait_for_all_requests();
+                break;
+            default:
+                throw InternalProgramError(&env.logger(), PA_CURRENT_FUNCTION, "Unknown Target");
+            }
+
+            NormalBattleMenuWatcher battle_menu(COLOR_YELLOW);
+            int ret = wait_until(
+                env.console, context,
+                std::chrono::seconds(15),
+                { battle_menu }
+            );
+
+            if (ret != 0) {
+                stats.errors++;
+                env.update_stats();
+                throw OperationFailedException(
+                    ErrorReport::SEND_ERROR_REPORT, env.console,
+                    "Failed to enter battle. Are you facing the Pokemon or in a menu?",
+                    true
+                );
+            }
+        },
+            {
+                static_cast<VisualInferenceCallback&>(encounter_watcher),
+                static_cast<AudioInferenceCallback&>(encounter_watcher),
+            }
     );
-    if (ret != 0) {
-        stats.errors++;
-        env.update_stats();
-        throw OperationFailedException(
-            ErrorReport::SEND_ERROR_REPORT, env.console,
-            "Failed to enter battle. Are you facing the Pokemon or in a menu?",
-            true
-        );
+    if (ret == 0) {
+        env.log("Battle menu detected.");
     }
+
+    if (STOP_ON_SHINY) { //Sound detection required for shinies, but no need to check if setting is not selected.
+        encounter_watcher.throw_if_no_sound();
+    }
+
+    bool is_shiny = (bool)encounter_watcher.shiny_screenshot();
+    if (is_shiny) {
+        stats.shinies++;
+        env.update_stats();
+
+        if (STOP_ON_SHINY) {
+            send_program_finished_notification(
+                env, NOTIFICATION_PROGRAM_FINISH,
+                "Shiny encountered!", encounter_watcher.shiny_screenshot() , true
+            );
+        }
+        else {
+            send_program_status_notification(
+                env, NOTIFICATION_STATUS_UPDATE,
+                "Shiny encountered!", encounter_watcher.shiny_screenshot() , true
+            );
+        }
+        return true;
+    }
+    return false;
 }
 
 void StatsReset::open_ball_menu(SingleSwitchProgramEnvironment& env, BotBaseContext& context) {
@@ -562,7 +613,10 @@ void StatsReset::program(SingleSwitchProgramEnvironment& env, BotBaseContext& co
     //Autosave must be off, settings like Tera farmer.
     bool stats_matched = false;
     while (!stats_matched){
-        enter_battle(env, context);
+        bool shiny = enter_battle(env, context);
+        if (STOP_ON_SHINY && shiny) {
+            break;
+        }
         bool target_fainted = run_battle(env, context);
 
         if (!target_fainted) {
@@ -598,13 +652,15 @@ void StatsReset::program(SingleSwitchProgramEnvironment& env, BotBaseContext& co
             pbf_press_button(context, BUTTON_HOME, 20, GameSettings::instance().GAME_TO_HOME_DELAY);
             reset_game_from_home(env.program_info(), env.console, context, 5 * TICKS_PER_SECOND);
         }
+        else {
+            auto snapshot = env.console.video().snapshot();
+            send_program_finished_notification(
+                env, NOTIFICATION_PROGRAM_FINISH,
+                "Match found!", snapshot, true
+            );
+        }
     }
     env.update_stats();
-    auto screenshot = env.console.video().snapshot();
-    send_program_finished_notification(
-        env, NOTIFICATION_PROGRAM_FINISH,
-        "Match found!", screenshot, true
-    );
     GO_HOME_WHEN_DONE.run_end_of_program(context);
 }
     
