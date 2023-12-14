@@ -220,12 +220,14 @@ bool StatsReset::enter_battle(SingleSwitchProgramEnvironment& env, BotBaseContex
         env.update_stats();
 
         if (STOP_ON_SHINY) {
+            pbf_press_button(context, BUTTON_CAPTURE, 2 * TICKS_PER_SECOND, 5 * TICKS_PER_SECOND);
             send_program_finished_notification(
                 env, NOTIFICATION_PROGRAM_FINISH,
                 "Shiny encountered!", encounter_watcher.shiny_screenshot() , true
             );
         }
         else {
+            pbf_press_button(context, BUTTON_CAPTURE, 2 * TICKS_PER_SECOND, 5 * TICKS_PER_SECOND);
             send_program_status_notification(
                 env, NOTIFICATION_STATUS_UPDATE,
                 "Shiny encountered!", encounter_watcher.shiny_screenshot() , true
@@ -653,6 +655,7 @@ void StatsReset::program(SingleSwitchProgramEnvironment& env, BotBaseContext& co
             reset_game_from_home(env.program_info(), env.console, context, 5 * TICKS_PER_SECOND);
         }
         else {
+            pbf_press_button(context, BUTTON_CAPTURE, 2 * TICKS_PER_SECOND, 5 * TICKS_PER_SECOND);
             auto snapshot = env.console.video().snapshot();
             send_program_finished_notification(
                 env, NOTIFICATION_PROGRAM_FINISH,
