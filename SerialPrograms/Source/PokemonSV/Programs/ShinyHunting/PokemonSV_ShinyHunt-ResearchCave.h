@@ -46,6 +46,24 @@ private:
     virtual std::string check_validity() const override;
     virtual void value_changed() override;
 
+    enum class Location{
+        UNKNOWN,
+        ZERO_GATE_FLY_SPOT,
+        ZERO_GATE_INSIDE,
+        TRAVELING_TO_CAVE,
+        AREA_ZERO_CAVE,
+    };
+
+    void inside_zero_gate_to_cave(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context);
+    void run_path(ProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context,
+    LetsGoEncounterBotTracker& tracker,
+    uint64_t iteration_count);
+
+    void set_flags(SingleSwitchProgramEnvironment& env);
+    void run_state(SingleSwitchProgramEnvironment& env, BotBaseContext& context);
+    bool run_traversal(BotBaseContext& context);
+    void set_flags_and_run_state(SingleSwitchProgramEnvironment& env, BotBaseContext& context);
+
     OCR::LanguageOCROption LANGUAGE;
 
     enum class Mode{
@@ -54,8 +72,6 @@ private:
         MAKE_SANDWICH,
     };
     EnumDropdownOption<Mode> MODE;
-
-
 
     SimpleIntegerOption<uint16_t> SANDWICH_RESET_IN_MINUTES;
     SandwichMakerOption SANDWICH_OPTIONS;
@@ -68,7 +84,15 @@ private:
     EventNotificationOption NOTIFICATION_STATUS_UPDATE;
     EventNotificationsOption NOTIFICATIONS;
 
+    SingleSwitchProgramEnvironment* m_env;
+
+    LetsGoHpWatcher* m_hp_watcher;
+    DiscontiguousTimeTracker* m_time_tracker;
     LetsGoEncounterBotTracker* m_encounter_tracker;
+
+    uint64_t m_iterations = 0;
+    Location m_current_location;
+    Location m_saved_location;
 
     //  Set to true if we should save on the first available opportunity.
     bool m_pending_save;
