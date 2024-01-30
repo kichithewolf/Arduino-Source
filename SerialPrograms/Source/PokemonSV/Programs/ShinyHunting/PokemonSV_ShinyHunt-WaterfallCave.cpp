@@ -30,6 +30,7 @@
 #include "PokemonSV_LetsGoTools.h"
 #include "PokemonSV/Programs/Eggs/PokemonSV_EggRoutines.h"
 #include "PokemonSV/Programs/PokemonSV_AreaZero.h"
+#include "PokemonSV/Inference/Overworld/PokemonSV_AreaZeroEntranceDetector.h"
 #include "PokemonSV_ShinyHunt-WaterfallCave.h"
 
 namespace PokemonAutomation {
@@ -125,6 +126,13 @@ ShinyHuntWaterfallCave::ShinyHuntWaterfallCave()
         TICKS_PER_SECOND,
         "350"
     )
+    , FALL_WAIT_TIME(
+        "<b>Fall Time:</b><br>Pause for this long while falling into the cave. "
+        "Adjust this if you are not dismounting your ride at the bottom of the hole.",
+        LockMode::UNLOCK_WHILE_RUNNING,
+        TICKS_PER_SECOND,
+        "1750"
+    )
     , INVERTED_FLIGHT(
         "<b>Inverted controls while flying:</b><br>"
         "Check this option if you have inverted controls on during flying.",
@@ -153,6 +161,7 @@ ShinyHuntWaterfallCave::ShinyHuntWaterfallCave()
     PA_ADD_OPTION(HEAL_AT_STATION);
     PA_ADD_OPTION(STATION_ARRIVE_PAUSE_SECONDS);
     PA_ADD_OPTION(MIDAIR_PAUSE_TIME);
+    PA_ADD_OPTION(FALL_WAIT_TIME);
     PA_ADD_OPTION(INVERTED_FLIGHT);
     PA_ADD_OPTION(NOTIFICATIONS);
 
@@ -212,7 +221,7 @@ void ShinyHuntWaterfallCave::inside_zero_gate_to_cave(const ProgramInfo& info, C
     pbf_press_button(context, BUTTON_B, 20, 50);
 
     //Wait for drop to end
-    pbf_wait(context, 1750);
+    pbf_wait(context, FALL_WAIT_TIME);
     context.wait_for_all_requests();
 
     //Dismount and center camera
@@ -225,24 +234,71 @@ void ShinyHuntWaterfallCave::run_path(
     LetsGoEncounterBotTracker& tracker,
     uint64_t iteration_count
 ){
-    //Turn right
-    pbf_press_button(context, BUTTON_L, 20, 50);
-    pbf_move_left_joystick(context, 255, 128, 10, 0);
-    pbf_press_button(context, BUTTON_L, 20, 50);
 
-    use_lets_go_to_clear_in_front(console, context, tracker, false, [&](BotBaseContext& context){
-        pbf_move_left_joystick(context, 128, 0, 800, 0);
-        pbf_press_button(context, BUTTON_L, 20, 50);
-    });
+    WhiteButtonWatcher go_back_up(COLOR_BLUE, WhiteButton::ButtonY, {0.434, 0.915, 0.029, 0.042});
+    int ret = run_until(
+        console, context,
+        [&](BotBaseContext& context){
 
-    //Turn around
-    pbf_move_left_joystick(context, 128, 255, 10, 0);
-    pbf_press_button(context, BUTTON_L, 20, 50);
+            //Move toward the entrance - we don't want to get stuck where we can't see it
+            //but we also don't want to get too close as then there will be spawns below.
+            console.log("Moving toward the entrance...");
+            use_lets_go_to_clear_in_front(console, context, tracker, false, [&](BotBaseContext& context){
+                find_and_center_on_entrance(env, console, context);
+                pbf_move_left_joystick(context, 128, 0, 750, 0);
+                pbf_press_button(context, BUTTON_L, 20, 50);
+            });
+    
+            //Now turn around, back is to the entrance
+            use_lets_go_to_clear_in_front(console, context, tracker, false, [&](BotBaseContext& context){
+                //  Turn around.
+                console.log("Turning back toward the cave...");
+                pbf_move_left_joystick(context, 128, 255, 30, 95);
+                pbf_press_button(context, BUTTON_L, 20, 50);
+            });
 
-    use_lets_go_to_clear_in_front(console, context, tracker, false, [&](BotBaseContext& context){
-        pbf_move_left_joystick(context, 128, 0, 800, 0);
-        pbf_press_button(context, BUTTON_L, 20, 50);
-    });
+            //  Move forward and kill everything in your path.
+            console.log("Moving away from entrance and killing everything...");
+            uint16_t duration = 325;
+            use_lets_go_to_clear_in_front(console, context, tracker, true, [&](BotBaseContext& context){
+                find_and_center_on_entrance(env, console, context);
+                //pbf_move_right_joystick(context, 128, 255, 70, 0);
+                pbf_move_left_joystick(context, 128, 255, 30, 95);
+                pbf_press_button(context, BUTTON_L, 20, 50);
+
+                uint8_t x = 128;
+                switch (iteration_count % 4){
+                case 0:
+                    x = 96;
+                    duration = 250;
+                    break;
+                case 1:
+                    x = 112;
+                    break;
+                case 2:
+                    x = 128;
+                    break;
+                case 3:
+                    x = 112;
+                    break;
+                }
+
+                ssf_press_button(context, BUTTON_L, 0, 20);
+                pbf_move_left_joystick(context, x, 0, duration, 0);
+            });
+            use_lets_go_to_clear_in_front(console, context, tracker, true, [&](BotBaseContext& context){
+                pbf_move_left_joystick(context, 128, 255, duration, 4 * TICKS_PER_SECOND);
+            });
+
+        },
+        { go_back_up }
+        );
+    if (ret == 0){
+        env.log("Detected Y button. Player fell. Resetting!");
+        throw ResetException();
+    }
+    context.wait_for_all_requests();
+
 }
 
 bool ShinyHuntWaterfallCave::run_traversal(BotBaseContext& context){
@@ -266,7 +322,6 @@ bool ShinyHuntWaterfallCave::run_traversal(BotBaseContext& context){
     WallClock start = current_time();
 
     size_t kills = 0, encounters = 0;
-    //std::chrono::minutes window_minutes(PLATFORM_RESET.WINDOW_IN_MINUTES); TODO MAKE CONFIG?
     std::chrono::minutes window_minutes(35);
     WallDuration window = m_time_tracker->last_window_in_realtime(start, window_minutes);
 
@@ -472,7 +527,7 @@ void ShinyHuntWaterfallCave::program(SingleSwitchProgramEnvironment& env, BotBas
     /*
     This is Area Zero Platform with a different path.
     Pokemon: Espeon, Umbreon, Chansey, Pawmi, Pawmo, Dugtrio, Glimmet, Sableye, Sneasel, Weavile, Gible, Gabite, Zweilous, Lycanroc-Midnight, Flutter Mane, Iron Jugulis
-    TODO: Dectect if fallen outside the cave by checking encounters?
+    TODO: Dectect if fallen outside the cave by looking for Go Back Up button
     */
 
     m_env = &env;

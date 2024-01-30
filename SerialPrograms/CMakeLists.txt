@@ -1302,6 +1302,8 @@ file(GLOB MAIN_SOURCES
     Source/PokemonSV/Inference/Map/PokemonSV_MapMenuDetector.h
     Source/PokemonSV/Inference/Map/PokemonSV_MapPokeCenterIconDetector.cpp
     Source/PokemonSV/Inference/Map/PokemonSV_MapPokeCenterIconDetector.h
+    Source/PokemonSV/Inference/Overworld/PokemonSV_AreaZeroEntranceDetector.cpp
+    Source/PokemonSV/Inference/Overworld/PokemonSV_AreaZeroEntranceDetector.h
     Source/PokemonSV/Inference/Overworld/PokemonSV_AreaZeroSkyDetector.cpp
     Source/PokemonSV/Inference/Overworld/PokemonSV_AreaZeroSkyDetector.h
     Source/PokemonSV/Inference/Overworld/PokemonSV_LetsGoHpReader.cpp

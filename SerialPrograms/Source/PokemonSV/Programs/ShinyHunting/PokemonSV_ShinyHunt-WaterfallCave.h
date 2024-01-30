@@ -82,6 +82,7 @@ private:
     BooleanCheckBoxOption HEAL_AT_STATION;
     SimpleIntegerOption<uint16_t> STATION_ARRIVE_PAUSE_SECONDS;
     TimeExpressionOption<uint16_t> MIDAIR_PAUSE_TIME;
+    TimeExpressionOption<uint16_t> FALL_WAIT_TIME;
 
     BooleanCheckBoxOption INVERTED_FLIGHT;
 
