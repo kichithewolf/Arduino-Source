@@ -1,11 +1,11 @@
-/*  Shiny Hunt - Research Cave
+/*  Shiny Hunt - Waterfall Cave
  *
  *  From: https://github.com/PokemonAutomation/Arduino-Source
  *
  */
 
-#ifndef PokemonAutomation_PokemonSV_ShinyHuntResearchCave_H
-#define PokemonAutomation_PokemonSV_ShinyHuntResearchCave_H
+#ifndef PokemonAutomation_PokemonSV_ShinyHuntWaterfallCave_H
+#define PokemonAutomation_PokemonSV_ShinyHuntWaterfallCave_H
 
 #include <functional>
 #include "Common/Cpp/Options/FloatingPointOption.h"
@@ -26,19 +26,19 @@ class DiscontiguousTimeTracker;
 class LetsGoEncounterBotTracker;
 
 
-class ShinyHuntResearchCave_Descriptor : public SingleSwitchProgramDescriptor {
+class ShinyHuntWaterfallCave_Descriptor : public SingleSwitchProgramDescriptor {
 public:
-    ShinyHuntResearchCave_Descriptor();
+    ShinyHuntWaterfallCave_Descriptor();
 
     struct Stats;
     virtual std::unique_ptr<StatsTracker> make_stats() const override;
 };
 
 
-class ShinyHuntResearchCave : public SingleSwitchProgramInstance, public ConfigOption::Listener {
+class ShinyHuntWaterfallCave : public SingleSwitchProgramInstance, public ConfigOption::Listener {
 public:
-    ~ShinyHuntResearchCave();
-    ShinyHuntResearchCave();
+    ~ShinyHuntWaterfallCave();
+    ShinyHuntWaterfallCave();
 
     virtual void program(SingleSwitchProgramEnvironment& env, BotBaseContext& context) override;
 
@@ -59,7 +59,6 @@ private:
     LetsGoEncounterBotTracker& tracker,
     uint64_t iteration_count);
 
-    void set_flags(SingleSwitchProgramEnvironment& env);
     void run_state(SingleSwitchProgramEnvironment& env, BotBaseContext& context);
     bool run_traversal(BotBaseContext& context);
     void set_flags_and_run_state(SingleSwitchProgramEnvironment& env, BotBaseContext& context);
@@ -80,6 +79,11 @@ private:
     GoHomeWhenDoneOption GO_HOME_WHEN_DONE;
 
     FloatingPointOption AUTO_HEAL_PERCENT;
+    BooleanCheckBoxOption HEAL_AT_STATION;
+    SimpleIntegerOption<uint16_t> STATION_ARRIVE_PAUSE_SECONDS;
+    TimeExpressionOption<uint16_t> MIDAIR_PAUSE_TIME;
+
+    BooleanCheckBoxOption INVERTED_FLIGHT;
 
     EventNotificationOption NOTIFICATION_STATUS_UPDATE;
     EventNotificationsOption NOTIFICATIONS;

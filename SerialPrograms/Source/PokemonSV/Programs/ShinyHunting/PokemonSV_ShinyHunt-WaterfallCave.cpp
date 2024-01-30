@@ -1,4 +1,4 @@
-/*  Shiny Hunt - Research Cave
+/*  Shiny Hunt - Waterfall Cave
  *
  *  From: https://github.com/PokemonAutomation/Arduino-Source
  *
@@ -30,7 +30,7 @@
 #include "PokemonSV_LetsGoTools.h"
 #include "PokemonSV/Programs/Eggs/PokemonSV_EggRoutines.h"
 #include "PokemonSV/Programs/PokemonSV_AreaZero.h"
-#include "PokemonSV_ShinyHunt-ResearchCave.h"
+#include "PokemonSV_ShinyHunt-WaterfallCave.h"
 
 namespace PokemonAutomation {
 namespace NintendoSwitch {
@@ -38,18 +38,18 @@ namespace PokemonSV {
 
 using namespace Pokemon;
 
-ShinyHuntResearchCave_Descriptor::ShinyHuntResearchCave_Descriptor()
+ShinyHuntWaterfallCave_Descriptor::ShinyHuntWaterfallCave_Descriptor()
     : SingleSwitchProgramDescriptor(
-        "PokemonSV:ShinyHuntResearchCave",
-        STRING_POKEMON + " SV", "Shiny Hunt - Research Cave",
-        "ComputerControl/blob/master/Wiki/Programs/PokemonSV/ShinyHunt-ResearchCave.md",
-        "Shiny hunt in the cave outside Research Station 1.",
+        "PokemonSV:ShinyHuntWaterfallCave",
+        STRING_POKEMON + " SV", "Shiny Hunt - Waterfall Cave",
+        "ComputerControl/blob/master/Wiki/Programs/PokemonSV/ShinyHunt-WaterfallCave.md",
+        "Shiny hunt in the waterfall cave outside Research Station 1.",
         FeedbackType::REQUIRED,
         AllowCommandsWhenRunning::DISABLE_COMMANDS,
         PABotBaseLevel::PABOTBASE_12KB
     )
 {}
-struct ShinyHuntResearchCave_Descriptor::Stats : public LetsGoEncounterBotStats {
+struct ShinyHuntWaterfallCave_Descriptor::Stats : public LetsGoEncounterBotStats {
     Stats()
         : m_sandwiches(m_stats["Sandwiches"])
         , m_autoheals(m_stats["Auto Heals"])
@@ -66,15 +66,15 @@ struct ShinyHuntResearchCave_Descriptor::Stats : public LetsGoEncounterBotStats 
     std::atomic<uint64_t>& m_game_resets;
     std::atomic<uint64_t>& m_errors;
 };
-std::unique_ptr<StatsTracker> ShinyHuntResearchCave_Descriptor::make_stats() const {
+std::unique_ptr<StatsTracker> ShinyHuntWaterfallCave_Descriptor::make_stats() const {
     return std::unique_ptr<StatsTracker>(new Stats());
 }
 
-ShinyHuntResearchCave::~ShinyHuntResearchCave(){
+ShinyHuntWaterfallCave::~ShinyHuntWaterfallCave(){
     MODE.remove_listener(*this);
 }
 
-ShinyHuntResearchCave::ShinyHuntResearchCave()
+ShinyHuntWaterfallCave::ShinyHuntWaterfallCave()
     : LANGUAGE(
           "<b>Game Language:</b><br>Required to read " + STRING_POKEMON + " names.",
           IV_READER().languages(),
@@ -107,6 +107,30 @@ ShinyHuntResearchCave::ShinyHuntResearchCave()
         LockMode::UNLOCK_WHILE_RUNNING,
         75, 0, 100
     )
+    , HEAL_AT_STATION(
+        "<b>Heal at Station:</b><br>If you're passing through the station, take the opportunity to heal up.",
+        LockMode::UNLOCK_WHILE_RUNNING,
+        true
+    )
+    , STATION_ARRIVE_PAUSE_SECONDS(
+        "<b>Station Arrive Pause Time:</b><br>Pause for this many seconds after leaving the station. "
+        "This gives the game time to load and thus reduce the chance of lag affecting the flight path.",
+        LockMode::UNLOCK_WHILE_RUNNING,
+        1
+    )
+    , MIDAIR_PAUSE_TIME(
+        "<b>Mid-Air Pause Time:</b><br>Pause for this long before dropping down into the cave. "
+        "Adjust this if you are sticking onto the walls while falling down the hole.",
+        LockMode::UNLOCK_WHILE_RUNNING,
+        TICKS_PER_SECOND,
+        "350"
+    )
+    , INVERTED_FLIGHT(
+        "<b>Inverted controls while flying:</b><br>"
+        "Check this option if you have inverted controls on during flying.",
+        LockMode::UNLOCK_WHILE_RUNNING,
+        false
+    )
     , NOTIFICATION_STATUS_UPDATE("Status Update", true, false, std::chrono::seconds(3600))
     , NOTIFICATIONS({
         &NOTIFICATION_STATUS_UPDATE,
@@ -126,14 +150,18 @@ ShinyHuntResearchCave::ShinyHuntResearchCave()
     PA_ADD_OPTION(ENCOUNTER_BOT_OPTIONS);
     PA_ADD_OPTION(GO_HOME_WHEN_DONE);
     PA_ADD_OPTION(AUTO_HEAL_PERCENT);
+    PA_ADD_OPTION(HEAL_AT_STATION);
+    PA_ADD_OPTION(STATION_ARRIVE_PAUSE_SECONDS);
+    PA_ADD_OPTION(MIDAIR_PAUSE_TIME);
+    PA_ADD_OPTION(INVERTED_FLIGHT);
     PA_ADD_OPTION(NOTIFICATIONS);
 
-    ShinyHuntResearchCave::value_changed();
+    ShinyHuntWaterfallCave::value_changed();
 
     MODE.add_listener(*this);
 }
 
-std::string ShinyHuntResearchCave::check_validity() const{
+std::string ShinyHuntWaterfallCave::check_validity() const{
     std::string error = SingleSwitchProgramInstance::check_validity();
     if (!error.empty()){
         return error;
@@ -144,7 +172,7 @@ std::string ShinyHuntResearchCave::check_validity() const{
     return "";
 }
 
-void ShinyHuntResearchCave::value_changed(){
+void ShinyHuntWaterfallCave::value_changed(){
     ConfigOptionState state = MODE == Mode::MAKE_SANDWICH
         ? ConfigOptionState::ENABLED
         : ConfigOptionState::HIDDEN;
@@ -154,9 +182,9 @@ void ShinyHuntResearchCave::value_changed(){
 
 struct ResetException{};
 
-void ShinyHuntResearchCave::inside_zero_gate_to_cave(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context) {
-    inside_zero_gate_to_station(info, console, context, 1, false); //TODO: make option for pause time and heal at station
-    context.wait_for(std::chrono::seconds(1));
+void ShinyHuntWaterfallCave::inside_zero_gate_to_cave(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context) {
+    inside_zero_gate_to_station(info, console, context, 1, HEAL_AT_STATION);
+    context.wait_for(std::chrono::seconds(STATION_ARRIVE_PAUSE_SECONDS));
 
     //Angle is already good, so center camera and mount ride
     pbf_press_button(context, BUTTON_L | BUTTON_PLUS, 20, 105);
@@ -171,16 +199,20 @@ void ShinyHuntResearchCave::inside_zero_gate_to_cave(const ProgramInfo& info, Co
     pbf_press_button(context, BUTTON_LCLICK, 50, 0);
 
     //Fly up
-    //TODO: Option for inverted flight controls
-    pbf_move_left_joystick(context, 128, 0, 2250, 250);
-    pbf_wait(context, 350); //TODO: make option for time to wait before dropping (in case of hitting and sticking to wall)
+    if (INVERTED_FLIGHT) {
+        pbf_move_left_joystick(context, 128, 255, 2250, 250);
+    }
+    else {
+        pbf_move_left_joystick(context, 128, 0, 2250, 250);
+    }
+    pbf_wait(context, MIDAIR_PAUSE_TIME);
     context.wait_for_all_requests();
 
     //Drop down into the depths
     pbf_press_button(context, BUTTON_B, 20, 50);
 
-    //Wait for drop to end - approx 10 sec drop
-    pbf_wait(context, 1375);
+    //Wait for drop to end
+    pbf_wait(context, 1750);
     context.wait_for_all_requests();
 
     //Dismount and center camera
@@ -188,94 +220,33 @@ void ShinyHuntResearchCave::inside_zero_gate_to_cave(const ProgramInfo& info, Co
     pbf_press_button(context, BUTTON_R, 20, 355);
 }
 
-void ShinyHuntResearchCave::run_path(
+void ShinyHuntWaterfallCave::run_path(
     ProgramEnvironment& env, ConsoleHandle& console, BotBaseContext& context,
     LetsGoEncounterBotTracker& tracker,
     uint64_t iteration_count
 ){
-    //  Go back to the wall.
-    console.log("Go back to wall...");
+    //Turn right
+    pbf_press_button(context, BUTTON_L, 20, 50);
+    pbf_move_left_joystick(context, 255, 128, 10, 0);
+    pbf_press_button(context, BUTTON_L, 20, 50);
+
     use_lets_go_to_clear_in_front(console, context, tracker, false, [&](BotBaseContext& context){
-        pbf_move_right_joystick(context, 128, 255, 80, 0);
-        pbf_move_left_joystick(context, 176, 255, 30, 0);
+        pbf_move_left_joystick(context, 128, 0, 800, 0);
         pbf_press_button(context, BUTTON_L, 20, 50);
     });
 
-    use_lets_go_to_clear_in_front(console, context, tracker, false, [&](BotBaseContext& context){
-        //  Move to wall.
-        pbf_move_left_joystick(context, 128, 0, 4 * TICKS_PER_SECOND, 0);
+    //Turn around
+    pbf_move_left_joystick(context, 128, 255, 10, 0);
+    pbf_press_button(context, BUTTON_L, 20, 50);
 
-        //  Turn around.
-        console.log("Turning towards sky...");
-        pbf_move_left_joystick(context, 128, 255, 30, 95);
+    use_lets_go_to_clear_in_front(console, context, tracker, false, [&](BotBaseContext& context){
+        pbf_move_left_joystick(context, 128, 0, 800, 0);
         pbf_press_button(context, BUTTON_L, 20, 50);
     });
-
-    //  Move forward and kill everything in your path.
-    console.log("Moving towards sky and killing everything...");
-    uint16_t duration = 325;
-    use_lets_go_to_clear_in_front(console, context, tracker, true, [&](BotBaseContext& context){
-        pbf_move_right_joystick(context, 128, 255, 70, 0);
-
-        uint8_t x = 128;
-        switch (iteration_count % 4){
-        case 0:
-            x = 96;
-            duration = 250;
-            break;
-        case 1:
-            x = 112;
-            break;
-        case 2:
-            x = 128;
-            break;
-        case 3:
-            x = 112;
-            break;
-        }
-
-        ssf_press_button(context, BUTTON_L, 0, 20);
-        pbf_move_left_joystick(context, x, 0, duration, 0);
-    });
-    use_lets_go_to_clear_in_front(console, context, tracker, true, [&](BotBaseContext& context){
-        pbf_move_left_joystick(context, 128, 255, duration, 4 * TICKS_PER_SECOND);
-    });
 }
 
-void ShinyHuntResearchCave::set_flags(SingleSwitchProgramEnvironment& env){
-    ConsoleHandle& console = m_env->console;
-
-    send_program_notification(
-        *m_env, NOTIFICATION_STATUS_UPDATE,
-        Color(0),
-        "Program Status",
-        {}, m_encounter_tracker->encounter_frequencies().dump_sorted_map("")
-    );
-
-    WallClock now = current_time();
-    if (MODE == Mode::MAKE_SANDWICH &&
-        m_last_sandwich + std::chrono::minutes(SANDWICH_RESET_IN_MINUTES) < now
-    ){
-        console.log("Enough time has elapsed. Time to reset sandwich...");
-        m_pending_sandwich = true;
-    }
-
-    int64_t seconds_on_sandwich = std::chrono::duration_cast<std::chrono::seconds>(now - m_last_sandwich).count();
-    console.log(
-        std::string("State:\n") +
-        "    Time on Sandwich: " + (m_last_sandwich == WallClock::min()
-            ? "N/A"
-            : std::to_string(seconds_on_sandwich)) + " seconds\n" +
-        "    Pending Save: " + (m_pending_save ? "Yes" : "No") + "\n" +
-        "    Pending Platform Reset: " + (m_pending_platform_reset ? "Yes" : "No") + "\n" +
-        "    Pending Sandwich: " + (m_pending_sandwich ? "Yes" : "No") + "\n" +
-        "    Reset after Sandwich: " + (m_reset_on_next_sandwich ? "Yes" : "No") + "\n"
-    );
-
-}
-
-bool ShinyHuntResearchCave::run_traversal(BotBaseContext& context){
-    ShinyHuntResearchCave_Descriptor::Stats& stats = m_env->current_stats<ShinyHuntResearchCave_Descriptor::Stats>();
+bool ShinyHuntWaterfallCave::run_traversal(BotBaseContext& context){
+    ShinyHuntWaterfallCave_Descriptor::Stats& stats = m_env->current_stats<ShinyHuntWaterfallCave_Descriptor::Stats>();
 
     const ProgramInfo& info = m_env->program_info();
     ConsoleHandle& console = m_env->console;
@@ -335,8 +306,8 @@ bool ShinyHuntResearchCave::run_traversal(BotBaseContext& context){
     return true;
 }
 
-void ShinyHuntResearchCave::run_state(SingleSwitchProgramEnvironment& env, BotBaseContext& context){
-    ShinyHuntResearchCave_Descriptor::Stats& stats = env.current_stats<ShinyHuntResearchCave_Descriptor::Stats>();
+void ShinyHuntWaterfallCave::run_state(SingleSwitchProgramEnvironment& env, BotBaseContext& context){
+    ShinyHuntWaterfallCave_Descriptor::Stats& stats = env.current_stats<ShinyHuntWaterfallCave_Descriptor::Stats>();
 
     const ProgramInfo& info = m_env->program_info();
     ConsoleHandle& console = m_env->console;
@@ -446,11 +417,36 @@ void ShinyHuntResearchCave::run_state(SingleSwitchProgramEnvironment& env, BotBa
     }
 }
 
-void ShinyHuntResearchCave::set_flags_and_run_state(SingleSwitchProgramEnvironment& env, BotBaseContext& context){
-    set_flags(env);
-    
-    ShinyHuntResearchCave_Descriptor::Stats& stats = env.current_stats<ShinyHuntResearchCave_Descriptor::Stats>();
+void ShinyHuntWaterfallCave::set_flags_and_run_state(SingleSwitchProgramEnvironment& env, BotBaseContext& context){
+    ShinyHuntWaterfallCave_Descriptor::Stats& stats = env.current_stats<ShinyHuntWaterfallCave_Descriptor::Stats>();
     ConsoleHandle& console = m_env->console;
+
+    send_program_notification(
+        *m_env, NOTIFICATION_STATUS_UPDATE,
+        Color(0),
+        "Program Status",
+        {}, m_encounter_tracker->encounter_frequencies().dump_sorted_map("")
+    );
+
+    WallClock now = current_time();
+    if (MODE == Mode::MAKE_SANDWICH &&
+        m_last_sandwich + std::chrono::minutes(SANDWICH_RESET_IN_MINUTES) < now
+    ){
+        console.log("Enough time has elapsed. Time to reset sandwich...");
+        m_pending_sandwich = true;
+    }
+
+    int64_t seconds_on_sandwich = std::chrono::duration_cast<std::chrono::seconds>(now - m_last_sandwich).count();
+    console.log(
+        std::string("State:\n") +
+        "    Time on Sandwich: " + (m_last_sandwich == WallClock::min()
+            ? "N/A"
+            : std::to_string(seconds_on_sandwich)) + " seconds\n" +
+        "    Pending Save: " + (m_pending_save ? "Yes" : "No") + "\n" +
+        "    Pending Platform Reset: " + (m_pending_platform_reset ? "Yes" : "No") + "\n" +
+        "    Pending Sandwich: " + (m_pending_sandwich ? "Yes" : "No") + "\n" +
+        "    Reset after Sandwich: " + (m_reset_on_next_sandwich ? "Yes" : "No") + "\n"
+    );
 
     try{
         run_state(env, context);
@@ -469,9 +465,15 @@ void ShinyHuntResearchCave::set_flags_and_run_state(SingleSwitchProgramEnvironme
 }
 
 
-void ShinyHuntResearchCave::program(SingleSwitchProgramEnvironment& env, BotBaseContext& context) {
-    ShinyHuntResearchCave_Descriptor::Stats& stats = env.current_stats<ShinyHuntResearchCave_Descriptor::Stats>();
+void ShinyHuntWaterfallCave::program(SingleSwitchProgramEnvironment& env, BotBaseContext& context) {
+    ShinyHuntWaterfallCave_Descriptor::Stats& stats = env.current_stats<ShinyHuntWaterfallCave_Descriptor::Stats>();
     assert_16_9_720p_min(env.logger(), env.console);
+
+    /*
+    This is Area Zero Platform with a different path.
+    Pokemon: Espeon, Umbreon, Chansey, Pawmi, Pawmo, Dugtrio, Glimmet, Sableye, Sneasel, Weavile, Gible, Gabite, Zweilous, Lycanroc-Midnight, Flutter Mane, Iron Jugulis
+    TODO: Dectect if fallen outside the cave by checking encounters?
+    */
 
     m_env = &env;
     m_iterations = 0;
