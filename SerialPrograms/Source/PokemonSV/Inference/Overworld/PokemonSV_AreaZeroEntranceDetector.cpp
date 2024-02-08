@@ -26,15 +26,12 @@ bool AreaZeroEntranceDetector::detect(Kernels::Waterfill::WaterfillObject& objec
 
     PackedBinaryMatrix matrix = compress_rgb32_to_binary_range(screen, 0xffc0c0c0, 0xffffffff);
 
-    size_t min_width = screen.width() / 16;
-    size_t min_height = screen.height() / 16;
+    size_t min_width = screen.width() / 10;
+    size_t min_height = screen.height() / 10;
 
     std::unique_ptr<WaterfillSession> session = make_WaterfillSession(matrix);
     auto iter = session->make_iterator(10000);
     while (iter->find_next(object, false)){
-//        if (object.min_y != 0){
-//            continue;
-//        }
         if (object.width() < min_width || object.height() < min_height){
             continue;
         }
@@ -48,9 +45,6 @@ bool AreaZeroEntranceDetector::detect(const ImageViewRGB32& screen) const{
     WaterfillObject object;
     return detect(object, screen);
 }
-
-
-
 
 AreaZeroEntranceTracker::AreaZeroEntranceTracker(VideoOverlay& overlay)
     : VisualInferenceCallback("AreaZeroEntranceTracker")
@@ -79,7 +73,7 @@ bool AreaZeroEntranceTracker::process_frame(const ImageViewRGB32& frame, WallClo
             m_overlay,
             COLOR_GREEN,
             translate_to_parent(frame, {0, 0, 1, 1}, object),
-            "Area Zero Entrance"
+            "Cave Entrance"
         ));
         m_center_x = object.center_of_gravity_x() / frame.width();
         m_center_y = object.center_of_gravity_y() / frame.height();
@@ -88,10 +82,6 @@ bool AreaZeroEntranceTracker::process_frame(const ImageViewRGB32& frame, WallClo
     }
     return false;
 }
-
-
-
-
 
 enum class OverworldState{
     None,
@@ -117,7 +107,7 @@ void find_and_center_on_entrance(
     WallClock start = current_time();
     while (true){
         if (current_time() - start > std::chrono::minutes(1)){
-            throw OperationFailedException(
+            throw OperationFailedException( //TODO
                 ErrorReport::NO_ERROR_REPORT, console,
                 "Failed to find the entrance after 1 minute. (state = " + std::to_string((int)state) + ")",
                 true

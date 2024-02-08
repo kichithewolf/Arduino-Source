@@ -190,6 +190,7 @@ void ShinyHuntWaterfallCave::value_changed(){
 }
 
 struct ResetException{};
+struct FellException{};
 
 void ShinyHuntWaterfallCave::inside_zero_gate_to_cave(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context) {
     inside_zero_gate_to_station(info, console, context, 1, HEAL_AT_STATION);
@@ -239,47 +240,46 @@ void ShinyHuntWaterfallCave::run_path(
     int ret = run_until(
         console, context,
         [&](BotBaseContext& context){
+            if (iteration_count == 0) {
+                //Move toward the entrance - we don't want to get stuck where we can't see it
+                //but we also don't want to get too close as then there will be spawns below.
+                console.log("Moving toward the entrance...");
+                use_lets_go_to_clear_in_front(console, context, tracker, false, [&](BotBaseContext& context) {
+                    find_and_center_on_entrance(env, console, context);
+                    pbf_move_left_joystick(context, 125, 0, 750, 0);
+                    pbf_press_button(context, BUTTON_L, 20, 50);
+                    });
 
-            //Move toward the entrance - we don't want to get stuck where we can't see it
-            //but we also don't want to get too close as then there will be spawns below.
-            console.log("Moving toward the entrance...");
-            use_lets_go_to_clear_in_front(console, context, tracker, false, [&](BotBaseContext& context){
-                find_and_center_on_entrance(env, console, context);
-                pbf_move_left_joystick(context, 128, 0, 750, 0);
-                pbf_press_button(context, BUTTON_L, 20, 50);
-            });
-    
-            //Now turn around, back is to the entrance
-            use_lets_go_to_clear_in_front(console, context, tracker, false, [&](BotBaseContext& context){
-                //  Turn around.
-                console.log("Turning back toward the cave...");
-                pbf_move_left_joystick(context, 128, 255, 30, 95);
-                pbf_press_button(context, BUTTON_L, 20, 50);
-            });
+                //Now turn around, back is to the entrance
+                use_lets_go_to_clear_in_front(console, context, tracker, false, [&](BotBaseContext& context) {
+                    //  Turn around.
+                    console.log("Turning back toward the cave...");
+                    pbf_move_left_joystick(context, 128, 255, 30, 95);
+                    pbf_press_button(context, BUTTON_L, 20, 50);
+                    });
+            }
 
             //  Move forward and kill everything in your path.
             console.log("Moving away from entrance and killing everything...");
-            uint16_t duration = 325;
+            uint16_t duration = 450;
             use_lets_go_to_clear_in_front(console, context, tracker, true, [&](BotBaseContext& context){
                 find_and_center_on_entrance(env, console, context);
-                //pbf_move_right_joystick(context, 128, 255, 70, 0);
-                pbf_move_left_joystick(context, 128, 255, 30, 95);
+                pbf_move_left_joystick(context, 128, 255, 5, 95); //Don't hold too long or will drift into cave over time.
                 pbf_press_button(context, BUTTON_L, 20, 50);
 
                 uint8_t x = 128;
                 switch (iteration_count % 4){
                 case 0:
-                    x = 96;
-                    duration = 250;
-                    break;
-                case 1:
-                    x = 112;
-                    break;
-                case 2:
                     x = 128;
                     break;
+                case 1:
+                    x = 128;
+                    break;
+                case 2:
+                    x = 144;
+                    break;
                 case 3:
-                    x = 112;
+                    x = 160;
                     break;
                 }
 
@@ -287,7 +287,7 @@ void ShinyHuntWaterfallCave::run_path(
                 pbf_move_left_joystick(context, x, 0, duration, 0);
             });
             use_lets_go_to_clear_in_front(console, context, tracker, true, [&](BotBaseContext& context){
-                pbf_move_left_joystick(context, 128, 255, duration, 4 * TICKS_PER_SECOND);
+                pbf_move_left_joystick(context, 128, 255, duration+5, 4 * TICKS_PER_SECOND);
             });
 
         },
@@ -295,7 +295,7 @@ void ShinyHuntWaterfallCave::run_path(
         );
     if (ret == 0){
         env.log("Detected Y button. Player fell. Resetting!");
-        throw ResetException();
+        throw FellException(); //need to throw a differnt exception, don't want to reset over a shiny by accident
     }
     context.wait_for_all_requests();
 
@@ -527,7 +527,9 @@ void ShinyHuntWaterfallCave::program(SingleSwitchProgramEnvironment& env, BotBas
     /*
     This is Area Zero Platform with a different path.
     Pokemon: Espeon, Umbreon, Chansey, Pawmi, Pawmo, Dugtrio, Glimmet, Sableye, Sneasel, Weavile, Gible, Gabite, Zweilous, Lycanroc-Midnight, Flutter Mane, Iron Jugulis
-    TODO: Dectect if fallen outside the cave by looking for Go Back Up button
+    Note: Can't use flag pins to position in Area Zero.
+    Resets if player falls out of the cave.
+    Camera support: Off
     */
 
     m_env = &env;
