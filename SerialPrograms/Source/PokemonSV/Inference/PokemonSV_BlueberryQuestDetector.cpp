@@ -55,7 +55,9 @@ std::string BlueberryQuestDetector::detect_quest(const ImageViewRGB32& screen) c
         extract_box_reference(screen, m_box),
         combine_rgb(198, 198, 198), combine_rgb(255, 255, 255), true
     );
-        
+
+    //quest_label.save("quest_label.png");
+
     OCR::StringMatchResult ocr_result = PokemonSV::BlueberryQuestReader::instance().read_substring(
         m_logger, m_language, quest_label,
         OCR::BLACK_TEXT_FILTERS()
