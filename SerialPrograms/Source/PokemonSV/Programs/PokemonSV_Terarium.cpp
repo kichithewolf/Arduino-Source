@@ -173,7 +173,7 @@ void central_to_savanna_plaza(const ProgramInfo& info, ConsoleHandle& console, B
 }
 
 void central_to_canyon_rest(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context) {
-    console.log("Attempting to fly to Canyon Rest Area..");
+    console.log("Attempting to fly to Canyon Rest Area.");
 
     open_map_from_overworld(info, console, context);
     pbf_move_left_joystick(context, 0, 140, 160, 20);
@@ -181,7 +181,7 @@ void central_to_canyon_rest(const ProgramInfo& info, ConsoleHandle& console, Bot
     fly_to_overworld_from_map(info, console, context);
 }
 
-void jump_glide_fly(ConsoleHandle& console, BotBaseContext& context) {
+void jump_glide_fly(ConsoleHandle& console, BotBaseContext& context, BBQOption& BBQ_OPTIONS, uint16_t hold_up, uint16_t flight_wait, uint16_t drop_time) {
     console.log("Jump, glide, fly.");
 
     ssf_press_button(context, BUTTON_B, 0, 100);
@@ -190,6 +190,21 @@ void jump_glide_fly(ConsoleHandle& console, BotBaseContext& context) {
     pbf_wait(context, 100);
     context.wait_for_all_requests();
     pbf_press_button(context, BUTTON_LCLICK, 50, 0);
+
+
+    if (BBQ_OPTIONS.INVERTED_FLIGHT) {
+        pbf_move_left_joystick(context, 128, 255, hold_up, 250);
+    }
+    else {
+        pbf_move_left_joystick(context, 128, 0, hold_up, 250);
+    }
+
+    pbf_wait(context, flight_wait);
+    context.wait_for_all_requests();
+
+    pbf_press_button(context, BUTTON_B, 20, 50);
+    pbf_wait(context, drop_time);
+    context.wait_for_all_requests();
 }
 
 

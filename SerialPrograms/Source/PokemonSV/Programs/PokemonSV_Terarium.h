@@ -7,6 +7,7 @@
 #ifndef PokemonAutomation_PokemonSV_Terarium_H
 #define PokemonAutomation_PokemonSV_Terarium_H
 
+#include "PokemonSV/Options/PokemonSV_BBQOption.h"
 
 namespace PokemonAutomation{
     class BotBaseContext;
@@ -39,8 +40,8 @@ void central_to_savanna_plaza(const ProgramInfo& info, ConsoleHandle& console, B
 // From central plaza, fly to canyon rest area
 void central_to_canyon_rest(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context);
 
-// Jump straigh up into the air and fly
-void jump_glide_fly(ConsoleHandle& console, BotBaseContext& context);
+// Jump straight up into the air and fly. Fly up for hold_up ticks, fly straight for flight_wait ticks, and wait drop_time ticks to fall to the ground.
+void jump_glide_fly(ConsoleHandle& console, BotBaseContext& context, BBQOption& BBQ_OPTIONS, uint16_t hold_up, uint16_t flight_wait, uint16_t drop_time);
 
 
 }
