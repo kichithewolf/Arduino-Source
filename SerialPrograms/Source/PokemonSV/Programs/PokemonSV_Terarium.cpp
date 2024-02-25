@@ -181,6 +181,15 @@ void central_to_canyon_rest(const ProgramInfo& info, ConsoleHandle& console, Bot
     fly_to_overworld_from_map(info, console, context);
 }
 
+void central_to_savanna_class(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context) {
+    console.log("Attempting to fly to Savanna Classroom.");
+
+    open_map_from_overworld(info, console, context);
+    pbf_move_left_joystick(context, 255, 220, 140, 20);
+    pbf_press_button(context, BUTTON_ZL, 40, 100);
+    fly_to_overworld_from_map(info, console, context);
+}
+
 void jump_glide_fly(ConsoleHandle& console, BotBaseContext& context, BBQOption& BBQ_OPTIONS, uint16_t hold_up, uint16_t flight_wait, uint16_t drop_time) {
     console.log("Jump, glide, fly.");
 
