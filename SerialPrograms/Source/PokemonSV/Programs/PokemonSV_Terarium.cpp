@@ -159,7 +159,7 @@ void central_to_coastal_plaza(const ProgramInfo& info, ConsoleHandle& console, B
     console.log("Attempting to fly to Coastal Plaza.");
 
     open_map_from_overworld(info, console, context);
-    pbf_move_left_joystick(context, 180, 0, 200, 20);
+    pbf_move_left_joystick(context, 180, 0, 210, 20);
     pbf_press_button(context, BUTTON_ZL, 40, 100);
     fly_to_overworld_from_map(info, console, context);
 }
