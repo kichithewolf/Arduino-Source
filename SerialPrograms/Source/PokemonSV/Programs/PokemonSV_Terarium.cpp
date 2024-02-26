@@ -61,7 +61,17 @@ void return_to_plaza(const ProgramInfo& info, ConsoleHandle& console, BotBaseCon
                 }
                 context.wait_for_all_requests();
 
-                open_map_from_overworld(info, console, context);
+                try {
+                    open_map_from_overworld(info, console, context);
+                }
+                catch (...) {
+                    //Stuck climbing on a wall? Center camera and try to backwards jump off.
+                    pbf_press_button(context, BUTTON_L, 50, 50);
+                    pbf_press_button(context, BUTTON_B, 50, 50);
+                    pbf_move_left_joystick(context, 128, 255, 20, 50);
+
+                    open_map_from_overworld(info, console, context);
+                }
 
                 //Move cursor to top left corner - even works when at Entrance fly point
                 pbf_press_button(context, BUTTON_ZL, 40, 100);
