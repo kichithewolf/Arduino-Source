@@ -41,6 +41,7 @@ void return_to_plaza(const ProgramInfo& info, ConsoleHandle& console, BotBaseCon
     console.log("Attempting to return to Central Plaza.");
     //Modified version of handle_battles_and_back_to_pokecenter()
     bool returned_to_pokecenter = false;
+    bool laggy = false;
 
     while(!returned_to_pokecenter){
         EncounterWatcher encounter_watcher(console, COLOR_RED);
@@ -78,8 +79,12 @@ void return_to_plaza(const ProgramInfo& info, ConsoleHandle& console, BotBaseCon
                 pbf_move_left_joystick(context, 0, 0, 500, 40);
 
                 //Now move toward center
-                pbf_move_left_joystick(context, 255, 255, 250, 40);
-                pbf_press_button(context, BUTTON_ZR, 40, 100);
+                if (laggy) {
+                    pbf_move_left_joystick(context, 255, 255, 300, 40); //overshoot by a bit (still works even if not laggy)
+                }
+                else {
+                    pbf_move_left_joystick(context, 255, 255, 250, 40); //250 is more accurate but 300 helps with lag
+                }
 
                 try {
                     //The only pokecenter on the map is Central Plaza
@@ -89,6 +94,7 @@ void return_to_plaza(const ProgramInfo& info, ConsoleHandle& console, BotBaseCon
                 }
                 catch(...) {
                     console.log("Failed to return to Pokecenter. Closing map and retrying.");
+                    laggy = true;
                 }
                 context.wait_for_all_requests();
             },
@@ -130,74 +136,194 @@ void return_to_plaza(const ProgramInfo& info, ConsoleHandle& console, BotBaseCon
 
 void central_to_polar_rest(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context) {
     console.log("Attempting to fly to Polar Rest Area.");
-
-    open_map_from_overworld(info, console, context);
-    pbf_move_left_joystick(context, 75, 0, 230, 20);
-    pbf_press_button(context, BUTTON_ZL, 40, 100);
-    fly_to_overworld_from_map(info, console, context);
+    for (int i = 0; i < 3; i++) {
+        try {
+            open_map_from_overworld(info, console, context);
+            pbf_move_left_joystick(context, 75, 0, 230, 20);
+            pbf_press_button(context, BUTTON_ZL, 40, 100);
+            fly_to_overworld_from_map(info, console, context);
+            break;
+        }
+        catch(...) {
+            console.log("Failed to fly! Closing map and retrying.");
+            press_Bs_to_back_to_overworld(info, console, context);
+            if (i == 2) {
+                throw OperationFailedException(
+                    ErrorReport::SEND_ERROR_REPORT, console,
+                    "Unable to fly to Polar Rest Area!",
+                    true
+                );
+            }
+        }
+    }
 }
 
 void central_to_polar_class1(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context) {
     console.log("Attempting to fly to Polar Classroom 1.");
-
-    open_map_from_overworld(info, console, context);
-    pbf_move_left_joystick(context, 0, 20, 150, 20);
-    pbf_press_button(context, BUTTON_ZL, 40, 100);
-    fly_to_overworld_from_map(info, console, context);
+    for (int i = 0; i < 3; i++) {
+        try {
+            open_map_from_overworld(info, console, context);
+            pbf_move_left_joystick(context, 0, 20, 150, 20);
+            pbf_press_button(context, BUTTON_ZL, 40, 100);
+            fly_to_overworld_from_map(info, console, context);
+            break;
+        }
+        catch(...) {
+            console.log("Failed to fly! Closing map and retrying.");
+            press_Bs_to_back_to_overworld(info, console, context);
+            if (i == 2) {
+                throw OperationFailedException(
+                    ErrorReport::SEND_ERROR_REPORT, console,
+                    "Unable to fly to Polar Classroom 1!",
+                    true
+                );
+            }
+        }
+    }
 }
 
 void central_to_polar_plaza(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context) {
     console.log("Attempting to fly to Polar Plaza.");
-
-    open_map_from_overworld(info, console, context);
-    pbf_move_left_joystick(context, 20, 25, 245, 20);
-    pbf_press_button(context, BUTTON_ZL, 40, 100);
-    fly_to_overworld_from_map(info, console, context);
+    for (int i = 0; i < 3; i++) {
+        try {
+            open_map_from_overworld(info, console, context);
+            pbf_move_left_joystick(context, 20, 25, 245, 20);
+            pbf_press_button(context, BUTTON_ZL, 40, 100);
+            fly_to_overworld_from_map(info, console, context);
+            break;
+        }
+        catch(...) {
+            console.log("Failed to fly! Closing map and retrying.");
+            press_Bs_to_back_to_overworld(info, console, context);
+            if (i == 2) {
+                throw OperationFailedException(
+                    ErrorReport::SEND_ERROR_REPORT, console,
+                    "Unable to fly to Polar Plaza!",
+                    true
+                );
+            }
+        }
+    }
 }
 
 void central_to_coastal_plaza(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context) {
     console.log("Attempting to fly to Coastal Plaza.");
-
-    open_map_from_overworld(info, console, context);
-    pbf_move_left_joystick(context, 180, 0, 210, 20);
-    pbf_press_button(context, BUTTON_ZL, 40, 100);
-    fly_to_overworld_from_map(info, console, context);
+    for (int i = 0; i < 3; i++) {
+        try {
+            open_map_from_overworld(info, console, context);
+            pbf_move_left_joystick(context, 180, 0, 210, 20);
+            pbf_press_button(context, BUTTON_ZL, 40, 100);
+            fly_to_overworld_from_map(info, console, context);
+            break;
+        }
+        catch(...) {
+            console.log("Failed to fly! Closing map and retrying.");
+            press_Bs_to_back_to_overworld(info, console, context);
+            if (i == 2) {
+                throw OperationFailedException(
+                    ErrorReport::SEND_ERROR_REPORT, console,
+                    "Unable to fly to Coastal Plaza!",
+                    true
+                );
+            }
+        }
+    }
 }
 
 void central_to_canyon_plaza(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context) {
     console.log("Attempting to fly to Canyon Plaza.");
-
-    open_map_from_overworld(info, console, context);
-    pbf_move_left_joystick(context, 0, 255, 215, 20);
-    pbf_press_button(context, BUTTON_ZL, 40, 100);
-    fly_to_overworld_from_map(info, console, context);
+    for (int i = 0; i < 3; i++) {
+        try {
+            open_map_from_overworld(info, console, context);
+            pbf_move_left_joystick(context, 0, 255, 215, 20);
+            pbf_press_button(context, BUTTON_ZL, 40, 100);
+            fly_to_overworld_from_map(info, console, context);
+            break;
+        }
+        catch(...) {
+            console.log("Failed to fly! Closing map and retrying.");
+            press_Bs_to_back_to_overworld(info, console, context);
+            if (i == 2) {
+                throw OperationFailedException(
+                    ErrorReport::SEND_ERROR_REPORT, console,
+                    "Unable to fly to Canyon Plaza!",
+                    true
+                );
+            }
+        }
+    }
 }
 
 void central_to_savanna_plaza(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context) {
     console.log("Attempting to fly to Savanna Plaza.");
-
-    open_map_from_overworld(info, console, context);
-    pbf_move_left_joystick(context, 165, 255, 180, 20);
-    pbf_press_button(context, BUTTON_ZL, 40, 100);
-    fly_to_overworld_from_map(info, console, context);
+    for (int i = 0; i < 3; i++) {
+        try {
+            open_map_from_overworld(info, console, context);
+            pbf_move_left_joystick(context, 165, 255, 180, 20);
+            pbf_press_button(context, BUTTON_ZL, 40, 100);
+            fly_to_overworld_from_map(info, console, context);
+            break;
+        }
+        catch(...) {
+            console.log("Failed to fly! Closing map and retrying.");
+            press_Bs_to_back_to_overworld(info, console, context);
+            if (i == 2) {
+                throw OperationFailedException(
+                    ErrorReport::SEND_ERROR_REPORT, console,
+                    "Unable to fly to Savanna Plaza!",
+                    true
+                );
+            }
+        }
+    }
 }
 
 void central_to_canyon_rest(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context) {
     console.log("Attempting to fly to Canyon Rest Area.");
-
-    open_map_from_overworld(info, console, context);
-    pbf_move_left_joystick(context, 0, 140, 160, 20);
-    pbf_press_button(context, BUTTON_ZL, 40, 100);
-    fly_to_overworld_from_map(info, console, context);
+    for (int i = 0; i < 3; i++) {
+        try {
+            open_map_from_overworld(info, console, context);
+            pbf_move_left_joystick(context, 0, 140, 160, 20);
+            pbf_press_button(context, BUTTON_ZL, 40, 100);
+            fly_to_overworld_from_map(info, console, context);
+            break;
+        }
+        catch(...) {
+            console.log("Failed to fly! Closing map and retrying.");
+            press_Bs_to_back_to_overworld(info, console, context);
+            if (i == 2) {
+                throw OperationFailedException(
+                    ErrorReport::SEND_ERROR_REPORT, console,
+                    "Unable to fly to Canyon Rest Area!",
+                    true
+                );
+            }
+        }
+    }
 }
 
 void central_to_savanna_class(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context) {
     console.log("Attempting to fly to Savanna Classroom.");
-
-    open_map_from_overworld(info, console, context);
-    pbf_move_left_joystick(context, 255, 220, 140, 20);
-    pbf_press_button(context, BUTTON_ZL, 40, 100);
-    fly_to_overworld_from_map(info, console, context);
+    for (int i = 0; i < 3; i++) {
+        try {
+            open_map_from_overworld(info, console, context);
+            pbf_move_left_joystick(context, 255, 220, 140, 20);
+            pbf_press_button(context, BUTTON_ZL, 40, 100);
+            fly_to_overworld_from_map(info, console, context);
+            break;
+        }
+        catch(...) {
+            console.log("Failed to fly! Closing map and retrying.");
+            press_Bs_to_back_to_overworld(info, console, context);
+            if (i == 2) {
+                throw OperationFailedException(
+                    ErrorReport::SEND_ERROR_REPORT, console,
+                    "Unable to fly to Savanna Classroom!",
+                    true
+                );
+            }
+        }
+    }
 }
 
 void jump_glide_fly(ConsoleHandle& console, BotBaseContext& context, BBQOption& BBQ_OPTIONS, uint16_t hold_up, uint16_t flight_wait, uint16_t drop_time) {
