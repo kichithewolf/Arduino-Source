@@ -85,6 +85,7 @@ void return_to_plaza(const ProgramInfo& info, ConsoleHandle& console, BotBaseCon
                 else {
                     pbf_move_left_joystick(context, 255, 255, 250, 40); //250 is more accurate but 300 helps with lag
                 }
+                pbf_press_button(context, BUTTON_ZR, 40, 100);
 
                 try {
                     //The only pokecenter on the map is Central Plaza
@@ -103,7 +104,7 @@ void return_to_plaza(const ProgramInfo& info, ConsoleHandle& console, BotBaseCon
                 static_cast<AudioInferenceCallback&>(encounter_watcher),
             }
         );
-        if (ret >= 0) {
+        if (ret == 0) {
             console.log("Battle menu detected.");
             encounter_watcher.throw_if_no_sound();
 
