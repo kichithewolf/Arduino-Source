@@ -43,6 +43,9 @@ void central_to_canyon_rest(const ProgramInfo& info, ConsoleHandle& console, Bot
 // From central plaza, fly to savanna classroom. Warning: extremely laggy area.
 void central_to_savanna_class(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context);
 
+// From central plaza, fly to chargestone cavern
+void central_to_chargestone(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context);
+
 // Jump straight up into the air and fly. Fly up for hold_up ticks, fly straight for flight_wait ticks, and wait drop_time ticks to fall to the ground.
 void jump_glide_fly(ConsoleHandle& console, BotBaseContext& context, BBQOption& BBQ_OPTIONS, uint16_t hold_up, uint16_t flight_wait, uint16_t drop_time);
 

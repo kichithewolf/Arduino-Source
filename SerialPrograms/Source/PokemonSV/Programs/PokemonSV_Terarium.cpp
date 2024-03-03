@@ -327,6 +327,30 @@ void central_to_savanna_class(const ProgramInfo& info, ConsoleHandle& console, B
     }
 }
 
+void central_to_chargestone(const ProgramInfo& info, ConsoleHandle& console, BotBaseContext& context) {
+    console.log("Attempting to fly to Chargestone Cavern.");
+    for (int i = 0; i < 3; i++) {
+        try {
+            open_map_from_overworld(info, console, context);
+            pbf_move_left_joystick(context, 0, 135, 130, 20);
+            pbf_press_button(context, BUTTON_ZL, 40, 100);
+            fly_to_overworld_from_map(info, console, context);
+            break;
+        }
+        catch(...) {
+            console.log("Failed to fly! Closing map and retrying.");
+            press_Bs_to_back_to_overworld(info, console, context);
+            if (i == 2) {
+                throw OperationFailedException(
+                    ErrorReport::SEND_ERROR_REPORT, console,
+                    "Unable to fly to Chargestone Cavern!",
+                    true
+                );
+            }
+        }
+    }
+}
+
 void jump_glide_fly(ConsoleHandle& console, BotBaseContext& context, BBQOption& BBQ_OPTIONS, uint16_t hold_up, uint16_t flight_wait, uint16_t drop_time) {
     console.log("Jump, glide, fly.");
 
