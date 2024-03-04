@@ -35,7 +35,7 @@ BlueberryQuestDetector::BlueberryQuestDetector(Logger& logger, Color color, Lang
         m_box = ImageFloatBox(0.604, 0.572, 0.282, 0.095);
         break;
     case QuestPosition::FOURTH:
-        m_box = ImageFloatBox(0.604, 0.749, 0.282, 0.096);
+        m_box = ImageFloatBox(0.604, 0.749, 0.282, 0.095);
         break;
     }
 }
