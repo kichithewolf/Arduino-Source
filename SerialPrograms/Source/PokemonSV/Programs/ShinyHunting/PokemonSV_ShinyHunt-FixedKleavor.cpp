@@ -77,8 +77,8 @@ void ShinyHuntKleavor::program(SingleSwitchProgramEnvironment& env, BotBaseConte
     * Start at Canyon Plaza fly point
     * You must not have encountered or had Kleavor spawn for the day (save, close, dateskip, then reopen the game to be sure)
     * Only really works because Kleavor is aggressive and will attack shortly after you fall on its head
-    * make sure no mass outbreak in area?
-    * Note that this program is mostly for proof of concept purposes, if you actually want shiny kleavor just sandwich or outbreak hunt it
+    * make sure no mass outbreak in area - load new day and then save for consistency
+    * Note that this program is mostly for proof of concept purposes, if you actually want shiny kleavor just find a shiny raid
     */
 
     assert_16_9_720p_min(env.logger(), env.console);
