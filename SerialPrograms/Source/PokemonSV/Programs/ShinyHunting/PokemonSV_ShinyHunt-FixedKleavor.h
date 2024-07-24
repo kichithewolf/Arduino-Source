@@ -10,6 +10,7 @@
 #include "CommonFramework/Notifications/EventNotificationsTable.h"
 #include "NintendoSwitch/NintendoSwitch_SingleSwitchProgram.h"
 #include "NintendoSwitch/Options/NintendoSwitch_GoHomeWhenDoneOption.h"
+#include "Common/Cpp/Options/BooleanCheckBoxOption.h"
 
 namespace PokemonAutomation {
 namespace NintendoSwitch {
@@ -29,6 +30,9 @@ public:
     virtual void program(SingleSwitchProgramEnvironment& env, BotBaseContext& context) override;
 
 private:
+    BooleanCheckBoxOption INVERTED_FLIGHT;
+    BooleanCheckBoxOption FIX_TIME_WHEN_DONE;
+
     GoHomeWhenDoneOption GO_HOME_WHEN_DONE;
     EventNotificationOption NOTIFICATION_STATUS_UPDATE;
     EventNotificationsOption NOTIFICATIONS;
