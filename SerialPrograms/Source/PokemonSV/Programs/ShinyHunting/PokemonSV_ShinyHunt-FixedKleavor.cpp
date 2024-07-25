@@ -44,18 +44,18 @@ ShinyHuntKleavor_Descriptor::ShinyHuntKleavor_Descriptor()
 struct ShinyHuntKleavor_Descriptor::Stats : public StatsTracker {
     Stats()
         : shinies(m_stats["Shinies"])
-        , encounters(m_stats["Date skips"])
         , nonspawns(m_stats["Non-spawns"])
+        , dateskips(m_stats["Date skips"])
         , errors(m_stats["Errors"])
     {
         m_display_order.emplace_back("Shinies");
-        m_display_order.emplace_back("Encounters");
         m_display_order.emplace_back("Non-spawns");
+        m_display_order.emplace_back("Date skips");
         m_display_order.emplace_back("Errors", HIDDEN_IF_ZERO);
     }
     std::atomic<uint64_t>& shinies;
-    std::atomic<uint64_t>& encounters;
     std::atomic<uint64_t>& nonspawns;
+    std::atomic<uint64_t>& dateskips;
     std::atomic<uint64_t>& errors;
 };
 std::unique_ptr<StatsTracker> ShinyHuntKleavor_Descriptor::make_stats() const {
@@ -123,13 +123,11 @@ void ShinyHuntKleavor::program(SingleSwitchProgramEnvironment& env, BotBaseConte
                 NormalBattleMenuWatcher battle_menu(COLOR_YELLOW);
                 int ret2 = wait_until(
                     env.console, context,
-                    std::chrono::seconds(45),
+                    std::chrono::seconds(15),
                     { battle_menu }
                 );
 
-                if (ret2 == 0) {
-                    stats.encounters++;
-                } else {
+                if (ret2 != 0) {
                     stats.nonspawns++;
                     env.update_stats();
                     env.log("Did not enter battle. Did Kleavor spawn?");
@@ -214,6 +212,8 @@ void ShinyHuntKleavor::program(SingleSwitchProgramEnvironment& env, BotBaseConte
             home_to_date_time(context, true, true);
             PokemonSwSh::roll_date_forward_1(context, true);
             resume_game_from_home(env.console, context);
+            stats.dateskips++;
+            env.update_stats();
 
             central_to_canyon_plaza(env.program_info(), env.console, context);
         }
