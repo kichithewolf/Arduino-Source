@@ -7,6 +7,7 @@
 #ifndef PokemonAutomation_ErrorReports_H
 #define PokemonAutomation_ErrorReports_H
 
+#include <memory>
 #include "Common/Cpp/AbstractLogger.h"
 #include "Common/Cpp/Options/GroupOption.h"
 #include "Common/Cpp/Options/StaticTextOption.h"
@@ -19,6 +20,7 @@
 namespace PokemonAutomation{
 
 
+class AsyncTask;
 class ConsoleHandle;
 
 
@@ -76,10 +78,10 @@ public:
     void add_file(std::string filename);
 
     void save(Logger* logger) const;
-    bool send(Logger& logger);
     void move_to_sent();
 
     static std::vector<std::string> get_pending_reports();
+    static void send(Logger& logger, std::shared_ptr<SendableErrorReport> report);
 
 private:
     std::string m_timestamp;
@@ -100,7 +102,7 @@ private:
 
 
 void send_reports(Logger& logger, const std::vector<std::string>& reports);
-void send_all_unsent_reports(Logger& logger, bool allow_prompt);
+std::unique_ptr<AsyncTask> send_all_unsent_reports(Logger& logger, bool allow_prompt);
 
 
 void report_error(
