@@ -14,26 +14,25 @@
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_Superscalar.h"
 #include "PokemonRSE/Inference/Sounds/PokemonRSE_ShinySoundDetector.h"
 #include "PokemonRSE/PokemonRSE_Navigation.h"
-#include "PokemonRSE_StarterReset.h"
+#include "PokemonRSE_AudioStarterReset.h"
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{
 namespace PokemonRSE{
 
-StarterReset_Descriptor::StarterReset_Descriptor()
+AudioStarterReset_Descriptor::AudioStarterReset_Descriptor()
     : SingleSwitchProgramDescriptor(
-        "PokemonRSE:StarterReset",
-        "Pokemon RSE", "Starter Reset",
-        "ComputerControl/blob/master/Wiki/Programs/PokemonRSE/StarterReset.md",
-        "(Audio only) Soft reset for a shiny starter. WIP, audio recognition does not work well.",
-        //FeedbackType::VIDEO_AUDIO,
-        FeedbackType::NONE,
+        "PokemonRSE:AudioStarterReset",
+        "Pokemon RSE", "[RS] Starter Reset - Audio only",
+        "ComputerControl/blob/master/Wiki/Programs/PokemonRSE/AudioStarterReset.md",
+        "Soft reset for a shiny starter. Ruby and Sapphire only. WIP, audio recognition does not work well.",
+        FeedbackType::AUDIO,
         AllowCommandsWhenRunning::DISABLE_COMMANDS,
         PABotBaseLevel::PABOTBASE_12KB
     )
 {}
 
-struct StarterReset_Descriptor::Stats : public StatsTracker{
+struct AudioStarterReset_Descriptor::Stats : public StatsTracker{
     Stats()
         : resets(m_stats["Resets"])
         , poochyena(m_stats["Shiny Poochyena"])
@@ -47,11 +46,11 @@ struct StarterReset_Descriptor::Stats : public StatsTracker{
     std::atomic<uint64_t>& poochyena;
     std::atomic<uint64_t>& shinystarter;
 };
-std::unique_ptr<StatsTracker> StarterReset_Descriptor::make_stats() const{
+std::unique_ptr<StatsTracker> AudioStarterReset_Descriptor::make_stats() const{
     return std::unique_ptr<StatsTracker>(new Stats());
 }
 
-StarterReset::StarterReset()
+AudioStarterReset::AudioStarterReset()
     : TARGET(
         "<b>Starter:</b><br>",
         {
@@ -96,9 +95,9 @@ StarterReset::StarterReset()
     PA_ADD_OPTION(NOTIFICATIONS);
 }
 
-void StarterReset::program(SingleSwitchProgramEnvironment& env, BotBaseContext& context){
+void AudioStarterReset::program(SingleSwitchProgramEnvironment& env, BotBaseContext& context){
     //assert_16_9_720p_min(env.logger(), env.console);
-    StarterReset_Descriptor::Stats& stats = env.current_stats<StarterReset_Descriptor::Stats>();
+    AudioStarterReset_Descriptor::Stats& stats = env.current_stats<AudioStarterReset_Descriptor::Stats>();
 
     /*
     * Settings: Text Speed fast.
@@ -133,7 +132,7 @@ void StarterReset::program(SingleSwitchProgramEnvironment& env, BotBaseContext& 
         default:
             OperationFailedException::fire(
                 env.console, ErrorReport::SEND_ERROR_REPORT,
-                "StarterReset: Invalid target."
+                "AudioStarterReset: Invalid target."
             );
             break;
         }

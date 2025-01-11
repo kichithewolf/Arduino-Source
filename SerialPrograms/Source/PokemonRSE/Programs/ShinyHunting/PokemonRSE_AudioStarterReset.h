@@ -4,8 +4,8 @@
  *
  */
 
-#ifndef PokemonAutomation_PokemonRSE_StarterReset_H
-#define PokemonAutomation_PokemonRSE_StarterReset_H
+#ifndef PokemonAutomation_PokemonRSE_AudioStarterReset_H
+#define PokemonAutomation_PokemonRSE_AudioStarterReset_H
 
 #include "Common/Cpp/Options/SimpleIntegerOption.h"
 #include "Common/Cpp/Options/TimeExpressionOption.h"
@@ -16,16 +16,16 @@ namespace PokemonAutomation{
 namespace NintendoSwitch{
 namespace PokemonRSE{
 
-class StarterReset_Descriptor : public SingleSwitchProgramDescriptor{
+class AudioStarterReset_Descriptor : public SingleSwitchProgramDescriptor{
 public:
-    StarterReset_Descriptor();
+    AudioStarterReset_Descriptor();
     struct Stats;
     virtual std::unique_ptr<StatsTracker> make_stats() const override;
 };
 
-class StarterReset : public SingleSwitchProgramInstance{
+class AudioStarterReset : public SingleSwitchProgramInstance{
 public:
-    StarterReset();
+    AudioStarterReset();
     virtual void program(SingleSwitchProgramEnvironment& env, BotBaseContext& context) override;
 
 private:
