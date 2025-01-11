@@ -1,4 +1,4 @@
-/*  Pokemon Emerald Settings
+/*  Pokemon RSE Settings
  *
  *  From: https://github.com/PokemonAutomation/Arduino-Source
  *
@@ -7,11 +7,11 @@
 #include "Common/NintendoSwitch/NintendoSwitch_ControllerDefs.h"
 #include "CommonFramework/Globals.h"
 
-#include "PokemonEmerald_Settings.h"
+#include "PokemonRSE_Settings.h"
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{
-namespace PokemonEmerald{
+namespace PokemonRSE{
 
 
 
@@ -53,6 +53,16 @@ GameSettings::GameSettings()
         TICKS_PER_SECOND,
         "60 * TICKS_PER_SECOND"
     )
+    , SHINY_SOUND_THRESHOLD(
+        "<b>Shiny Sound Threshold:</b><br>Maximum error coefficient to trigger a shiny detection.",
+        LockMode::LOCK_WHILE_RUNNING,
+        0.87, 0, 1.0
+    )
+    , SHINY_SOUND_LOW_FREQUENCY(
+        "<b>Shiny Sound Low Frequency (Hz):</b><br>High pass filter frequency for shiny sound.",
+        LockMode::LOCK_WHILE_RUNNING,
+        5000, 0, 48000
+    )
 {
     PA_ADD_STATIC(m_start_game_timings);
     PA_ADD_OPTION(START_GAME_MASH);
@@ -68,10 +78,10 @@ GameSettings::GameSettings()
 GameSettings_Descriptor::GameSettings_Descriptor()
     : PanelDescriptor(
         Color(),
-        "PokemonEmerald:GlobalSettings",
-        "Pokemon Emerald", "Pokemon Emerald Settings",
-        "ComputerControl/blob/master/Wiki/Programs/PokemonEmerald/EmeraldSettings.md",
-        "Global Pokemon Emerald Settings"
+        "PokemonRSE:GlobalSettings",
+        "Pokemon RSE", "Pokemon RSE Settings",
+        "ComputerControl/blob/master/Wiki/Programs/PokemonRSE/RSESettings.md",
+        "Global Pokemon RSE Settings"
     )
 {}
 

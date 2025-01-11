@@ -1,17 +1,17 @@
-/*  Pokemon Emerald Panels
+/*  Pokemon RSE Panels
  *
  *  From: https://github.com/PokemonAutomation/Arduino-Source
  *
  */
 
-#ifndef PokemonAutomation_PokemonEmerald_Panels_H
-#define PokemonAutomation_PokemonEmerald_Panels_H
+#ifndef PokemonAutomation_PokemonRSE_Panels_H
+#define PokemonAutomation_PokemonRSE_Panels_H
 
 #include "CommonFramework/Panels/PanelList.h"
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{
-namespace PokemonEmerald{
+namespace PokemonRSE{
 
 
 

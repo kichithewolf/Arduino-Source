@@ -1,24 +1,24 @@
-/*  Pokemon Emerald Panels
+/*  Pokemon RSE Panels
  *
  *  From: https://github.com/PokemonAutomation/Arduino-Source
  *
  */
 
 #include "Pokemon/Pokemon_Strings.h"
-#include "PokemonEmerald_Panels.h"
+#include "PokemonRSE_Panels.h"
 
 //#include "PokemonSV_Settings.h"
 
-#include "Programs/ShinyHunting/PokemonEmerald_StarterReset.h"
+#include "Programs/ShinyHunting/PokemonRSE_StarterReset.h"
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{
-namespace PokemonEmerald{
+namespace PokemonRSE{
 
 
 
 PanelListFactory::PanelListFactory()
-    : PanelListDescriptor("Pokemon Emerald")
+    : PanelListDescriptor("Pokemon Ruby, Sapphire, and Emerald")
 {}
 
 std::vector<PanelEntry> PanelListFactory::make_panels() const{

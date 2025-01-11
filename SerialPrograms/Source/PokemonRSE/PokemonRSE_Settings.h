@@ -1,11 +1,11 @@
-/*  Pokemon Emerald Settings
+/*  Pokemon RSE Settings
  *
  *  From: https://github.com/PokemonAutomation/Arduino-Source
  *
  */
 
-#ifndef PokemonAutomation_PokemonEmerald_Settings_H
-#define PokemonAutomation_PokemonEmerald_Settings_H
+#ifndef PokemonAutomation_PokemonRSE_Settings_H
+#define PokemonAutomation_PokemonRSE_Settings_H
 
 #include "Common/Cpp/Options/StaticTextOption.h"
 #include "Common/Cpp/Options/BooleanCheckBoxOption.h"
@@ -15,7 +15,7 @@
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{
-namespace PokemonEmerald{
+namespace PokemonRSE{
 
 
 class GameSettings : public BatchOption{
@@ -31,6 +31,9 @@ public:
     TimeExpressionOption<uint16_t> START_GAME_WAIT;
     TimeExpressionOption<uint16_t> ENTER_GAME_MASH;
     TimeExpressionOption<uint16_t> ENTER_GAME_WAIT;
+
+    FloatingPointOption SHINY_SOUND_THRESHOLD;
+    FloatingPointOption SHINY_SOUND_LOW_FREQUENCY;
 
 };
 

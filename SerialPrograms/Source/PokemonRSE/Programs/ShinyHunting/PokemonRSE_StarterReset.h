@@ -1,20 +1,19 @@
-/*  Emerald Starter Reset
+/*  RS Starter Reset
  *
  *  From: https://github.com/PokemonAutomation/Arduino-Source
  *
  */
 
-#ifndef PokemonAutomation_PokemonEmerald_StarterReset_H
-#define PokemonAutomation_PokemonEmerald_StarterReset_H
+#ifndef PokemonAutomation_PokemonRSE_StarterReset_H
+#define PokemonAutomation_PokemonRSE_StarterReset_H
 
 #include "Common/Cpp/Options/SimpleIntegerOption.h"
 #include "CommonFramework/Notifications/EventNotificationsTable.h"
 #include "NintendoSwitch/NintendoSwitch_SingleSwitchProgram.h"
-#include "NintendoSwitch/Options/NintendoSwitch_GoHomeWhenDoneOption.h"
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{
-namespace PokemonEmerald{
+namespace PokemonRSE{
 
 class StarterReset_Descriptor : public SingleSwitchProgramDescriptor{
 public:
@@ -29,8 +28,13 @@ public:
     virtual void program(SingleSwitchProgramEnvironment& env, BotBaseContext& context) override;
 
 private:
-    SimpleIntegerOption<uint32_t> ATTEMPTS;
-    GoHomeWhenDoneOption GO_HOME_WHEN_DONE;
+    enum class Target{
+        treecko,
+        torchic,
+        mudkip,
+    };
+    EnumDropdownOption<Target> TARGET;
+
     EventNotificationOption NOTIFICATION_STATUS_UPDATE;
     EventNotificationsOption NOTIFICATIONS;
 };

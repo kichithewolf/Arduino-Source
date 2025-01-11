@@ -1075,12 +1075,6 @@ file(GLOB MAIN_SOURCES
     Source/PokemonBDSP/Programs/Trading/PokemonBDSP_TradeRoutines.h
     Source/PokemonBDSP/Resources/PokemonBDSP_NameDatabase.cpp
     Source/PokemonBDSP/Resources/PokemonBDSP_NameDatabase.h
-    Source/PokemonEmerald/Programs/ShinyHunting/PokemonEmerald_StarterReset.cpp
-    Source/PokemonEmerald/Programs/ShinyHunting/PokemonEmerald_StarterReset.h
-    Source/PokemonEmerald/PokemonEmerald_Panels.cpp
-    Source/PokemonEmerald/PokemonEmerald_Panels.h
-    Source/PokemonEmerald/PokemonEmerald_Settings.cpp
-    Source/PokemonEmerald/PokemonEmerald_Settings.h
     Source/PokemonHome/Inference/PokemonHome_BallReader.cpp
     Source/PokemonHome/Inference/PokemonHome_BallReader.h
     Source/PokemonHome/Inference/PokemonHome_BoxGenderDetector.cpp
@@ -1297,6 +1291,16 @@ file(GLOB MAIN_SOURCES
     Source/PokemonLA/Resources/PokemonLA_PokemonSprites.h
     Source/PokemonLA/Resources/PokemonLA_WeatherAndTimeIcons.cpp
     Source/PokemonLA/Resources/PokemonLA_WeatherAndTimeIcons.h
+    Source/PokemonRSE/Inference/Sounds/PokemonRSE_ShinySoundDetector.cpp
+    Source/PokemonRSE/Inference/Sounds/PokemonRSE_ShinySoundDetector.h
+    Source/PokemonRSE/Programs/ShinyHunting/PokemonRSE_StarterReset.cpp
+    Source/PokemonRSE/Programs/ShinyHunting/PokemonRSE_StarterReset.h
+    Source/PokemonRSE/PokemonRSE_Navigation.cpp
+    Source/PokemonRSE/PokemonRSE_Navigation.h
+    Source/PokemonRSE/PokemonRSE_Panels.cpp
+    Source/PokemonRSE/PokemonRSE_Panels.h
+    Source/PokemonRSE/PokemonRSE_Settings.cpp
+    Source/PokemonRSE/PokemonRSE_Settings.h
     Source/PokemonSV/Inference/Battles/PokemonSV_BattleBallReader.cpp
     Source/PokemonSV/Inference/Battles/PokemonSV_BattleBallReader.h
     Source/PokemonSV/Inference/Battles/PokemonSV_EncounterWatcher.cpp
