@@ -22,13 +22,13 @@ Color pick_color(FeedbackType feedback, PABotBaseLevel size){
     case PABotBaseLevel::PABOTBASE_12KB:
         if (feedback == FeedbackType::REQUIRED){
             return COLOR_DARKGREEN;
-        }else if (feedback == FeedbackType::VIDEO_AUDIO){
+        }else if (feedback == FeedbackType::VIDEO_AUDIO || feedback == FeedbackType::VIDEO_AUDIO_GBA){
             return COLOR_GREEN2;
         }else{
             return COLOR_BLUE;
         }
     case PABotBaseLevel::PABOTBASE_31KB:
-        return (feedback == FeedbackType::REQUIRED || feedback == FeedbackType::VIDEO_AUDIO) ? COLOR_PURPLE : COLOR_RED;
+        return (feedback == FeedbackType::REQUIRED || feedback == FeedbackType::VIDEO_AUDIO || feedback == FeedbackType::VIDEO_AUDIO_GBA) ? COLOR_PURPLE : COLOR_RED;
     }
     return Color();
 }
