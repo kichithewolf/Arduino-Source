@@ -38,7 +38,8 @@ private:
     bool walk_down(SingleSwitchProgramEnvironment& env, BotBaseContext& context);
     void flee_battle(SingleSwitchProgramEnvironment& env, BotBaseContext& context);
     bool handle_encounter(SingleSwitchProgramEnvironment& env, BotBaseContext& context);
-    void solve_puzzle(SingleSwitchProgramEnvironment& env, BotBaseContext& context);
+    bool reset_position(SingleSwitchProgramEnvironment& env, BotBaseContext& context);
+    bool solve_puzzle(SingleSwitchProgramEnvironment& env, BotBaseContext& context);
     bool walk_up(SingleSwitchProgramEnvironment& env, BotBaseContext& context);
 };
 

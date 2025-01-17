@@ -85,7 +85,7 @@ bool ShinyHuntDeoxys::walk_down(SingleSwitchProgramEnvironment& env, BotBaseCont
         {{run_up_call}}
     );
     if (res == 0) {
-        env.log("PokeNav call detected. Ending call.");
+        env.log("walk_down(): PokeNav call detected. Ending call.");
         pbf_mash_button(context, BUTTON_B, 375);
         context.wait_for_all_requests();
         return false;
@@ -203,7 +203,55 @@ bool ShinyHuntDeoxys::handle_encounter(SingleSwitchProgramEnvironment& env, BotB
     return false;
 }
 
-void ShinyHuntDeoxys::solve_puzzle(SingleSwitchProgramEnvironment& env, BotBaseContext& context) {
+// Attempt to align to the center (stairs) and exit so that the puzzle will be reset and walk up will work.
+bool ShinyHuntDeoxys::reset_position(SingleSwitchProgramEnvironment& env, BotBaseContext& context) {
+    AdvanceDialogWatcher puzzle_reset(COLOR_ORANGE);
+
+    env.log("Resetting position due to PokeNav call.");
+    int res = run_until(
+        env.console, context,
+        [&](BotBaseContext& context) {
+            //Try to head down
+            pbf_press_dpad(context, DPAD_DOWN, 375, 80);
+
+            //Turn and move 1 step left. In case character is stuck on something heading down.
+            pbf_press_dpad(context, DPAD_LEFT, 10, 80);
+            pbf_press_dpad(context, DPAD_LEFT, 10, 80);
+
+            //Try to head down again
+            pbf_press_dpad(context, DPAD_DOWN, 375, 80);
+
+            //Assuming character is at and facing the bottom of the island, align self
+            pbf_press_dpad(context, DPAD_LEFT, 10, 80);
+            pbf_press_dpad(context, DPAD_LEFT, 10, 80);
+            pbf_press_dpad(context, DPAD_LEFT, 10, 80);
+            pbf_press_dpad(context, DPAD_LEFT, 10, 80);
+            pbf_press_dpad(context, DPAD_LEFT, 10, 80);
+            pbf_press_dpad(context, DPAD_LEFT, 10, 80);
+
+            //Get on the stairs
+            pbf_press_dpad(context, DPAD_DOWN, 10, 80);
+            pbf_press_dpad(context, DPAD_DOWN, 10, 80);
+
+            //Now exit - we call walk_down in case there's a call on the way.
+            //Otherwise, attempting to realign on the dock means we'll get stuck off-center and can't leave
+            bool successful_walk_down = walk_down(env, context);
+            while (!successful_walk_down) {
+                walk_down(env, context);
+            }
+        },
+        {{puzzle_reset}}
+    );
+    if (res == 0) {
+        env.log("reset_position(): PokeNav call detected. Ending call.");
+        pbf_mash_button(context, BUTTON_B, 375);
+        context.wait_for_all_requests();
+        return false;
+    }
+    return true;
+}
+
+bool ShinyHuntDeoxys::solve_puzzle(SingleSwitchProgramEnvironment& env, BotBaseContext& context) {
     AdvanceDialogWatcher puzzle_solve_call(COLOR_ORANGE);
 
     int res = run_until(
@@ -306,18 +354,16 @@ void ShinyHuntDeoxys::solve_puzzle(SingleSwitchProgramEnvironment& env, BotBaseC
         {{puzzle_solve_call}}
     );
     if (res == 0) {
-        env.log("PokeNav call detected. Ending call.");
-        pbf_mash_button(context, BUTTON_B, 375);
+        env.log("solve_puzzle(): PokeNav call detected. Ending call.");
+        pbf_mash_button(context, BUTTON_B, 500);
         context.wait_for_all_requests();
         return false;
     }
     return true;
-
-
-
 }
 
 bool ShinyHuntDeoxys::walk_up(SingleSwitchProgramEnvironment& env, BotBaseContext& context) {
+    env.log("Walking up to Deoxys.");
     //Walk up to the triangle rock from the ship. No bike allowed.
     AdvanceDialogWatcher run_up_call(COLOR_ORANGE);
     int res = run_until(
@@ -329,8 +375,8 @@ bool ShinyHuntDeoxys::walk_up(SingleSwitchProgramEnvironment& env, BotBaseContex
         {{run_up_call}}
     );
     if (res == 0) {
-        env.log("PokeNav call detected. Ending call.");
-        pbf_mash_button(context, BUTTON_B, 375);
+        env.log("walk_up(): PokeNav call detected. Ending call.");
+        pbf_mash_button(context, BUTTON_B, 500);
         context.wait_for_all_requests();
         return false;
     }
@@ -358,15 +404,22 @@ void ShinyHuntDeoxys::program(SingleSwitchProgramEnvironment& env, BotBaseContex
     */
 
     while (true) {
-        bool successful_walk_up = walk_up(env, context);
-        while (!successful_walk_up) {
-            walk_up(env, context);
-        }
-
-        bool successful_puzzle = solve_puzzle(env, context);
-        while (!successful_puzzle) {
-            //reset_puzzle() left 2 down lots then align to a tree. then turn back and find the steps.
-            solve_puzzle(env, context);
+        bool in_position = false;
+        while (!in_position) {
+            bool successful_walk_up = walk_up(env, context);
+            while (!successful_walk_up) {
+                walk_up(env, context);
+            }
+            bool successful_puzzle = solve_puzzle(env, context);
+            if (!successful_puzzle) {
+                bool realigned = reset_position(env, context);
+                while (!realigned) {
+                    realigned = reset_position(env, context);
+                }
+            }
+            else {
+                in_position = true;
+            }
         }
 
         //Start battle. We start outside of solve_puzzle in case there's a PokeNav call on the very last step.
