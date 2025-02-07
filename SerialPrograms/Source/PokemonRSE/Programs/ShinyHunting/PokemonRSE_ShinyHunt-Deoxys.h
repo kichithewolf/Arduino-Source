@@ -29,6 +29,13 @@ public:
     virtual void program(SingleSwitchProgramEnvironment& env, SwitchControllerContext& context) override;
 
 private:
+    enum class StartPos{
+        boat,
+        rock_unsolved,
+        rock_solved,
+    };
+    EnumDropdownOption<StartPos> STARTPOS;
+
     TimeExpressionOption<uint16_t> WALK_UP_DOWN_TIME;
 
     EventNotificationOption NOTIFICATION_SHINY;
