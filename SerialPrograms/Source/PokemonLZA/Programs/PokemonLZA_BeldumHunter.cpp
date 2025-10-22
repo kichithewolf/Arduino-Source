@@ -31,7 +31,7 @@ BeldumHunter_Descriptor::BeldumHunter_Descriptor()
         "PokemonLZA:BeldumHunter",
         STRING_POKEMON + " LZA", "Beldum Hunter",
         "Programs/PokemonLZA/BeldumHunter.html",
-        "Reset in Lysandre Labs to shiny hunt Beldum.",
+        "Repeatedly enter Lysandre Labs to shiny hunt Beldum.",
         ProgramControllerClass::StandardController_NoRestrictions,
         FeedbackType::VIDEO_AUDIO,
         AllowCommandsWhenRunning::DISABLE_COMMANDS
@@ -181,6 +181,9 @@ void BeldumHunter::program(SingleSwitchProgramEnvironment& env, ProControllerCon
             if (shiny_found) {
                 stats.shinies++;
                 env.update_stats();
+
+                pbf_press_button(context, BUTTON_HOME, 160ms, 3000ms);
+
                 send_program_notification(env, NOTIFICATION_SHINY,
                     COLOR_YELLOW, "Shiny sound detected!", {},
                     "", env.console.video().snapshot(), true);
