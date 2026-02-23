@@ -111,7 +111,7 @@ void LegendaryReset::program(SingleSwitchProgramEnvironment& env, ProControllerC
         }
 
         //handle_encounter will wait for "POKEMON appeared!"
-        bool legendary_shiny = handle_encounter(env.console, context, true);
+        bool legendary_shiny = handle_encounter(env.console, context, false);
         if (legendary_shiny) {
             stats.shinies++;
 
