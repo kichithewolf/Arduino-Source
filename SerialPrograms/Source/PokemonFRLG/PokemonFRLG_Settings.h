@@ -7,6 +7,7 @@
 #ifndef PokemonAutomation_PokemonFRLG_Settings_H
 #define PokemonAutomation_PokemonFRLG_Settings_H
 
+#include "Common/Cpp/Options/EnumDropdownOption.h"
 #include "Common/Cpp/Options/StaticTextOption.h"
 #include "Common/Cpp/Options/FloatingPointOption.h"
 #include "Common/Cpp/Options/TimeDurationOption.h"
@@ -17,10 +18,27 @@ namespace NintendoSwitch{
 namespace PokemonFRLG{
 
 
-class GameSettings : public BatchOption{
+class GameSettings : public BatchOption, private ConfigOption::Listener{
+    ~GameSettings();
     GameSettings();
+
 public:
     static GameSettings& instance();
+
+    enum class Device{
+        switch_1_2,
+        gamecube_gba_player,
+        anbernic_rg35xxsp,
+        analogue_pocket,
+        custom,
+    };
+
+    SectionDividerOption m_game_device_settings;
+    EnumDropdownOption<Device> DEVICE;
+    FloatingPointOption X;
+    FloatingPointOption Y;
+    FloatingPointOption WIDTH;
+    FloatingPointOption HEIGHT;
 
     SectionDividerOption m_soft_reset_timings;
     MillisecondsOption SELECT_BUTTON_MASH0;
@@ -31,6 +49,8 @@ public:
     FloatingPointOption SHINY_SOUND_THRESHOLD;
     FloatingPointOption SHINY_SOUND_LOW_FREQUENCY;
 
+private:
+    virtual void on_config_value_changed(void* object) override;
 };
 
 

@@ -20,8 +20,33 @@ GameSettings& GameSettings::instance(){
     static GameSettings settings;
     return settings;
 }
+GameSettings::~GameSettings(){
+    DEVICE.remove_listener(*this);
+    X.remove_listener(*this);
+    Y.remove_listener(*this);
+    WIDTH.remove_listener(*this);
+    HEIGHT.remove_listener(*this);
+}
 GameSettings::GameSettings()
     : BatchOption(LockMode::LOCK_WHILE_RUNNING)
+    , m_game_device_settings("<font size=4><b>Game Device settings:</b></font>")
+    , DEVICE(
+        "<b>Device:</b><br>Select the device the game is running on. "
+        "Refer to the documentation for specific setups.",
+        {
+            {Device::switch_1_2,            "switch_1_2",           "Nintendo Switch 1 and 2"},
+            {Device::gamecube_gba_player,   "gamecube_gba_player",  "GameCube (GBA Player)"},
+            //{Device::anbernic_rg35xxsp,       "anbernic_rg35xxsp",      "test retro handheld device"},
+            //{Device::analogue_pocket,       "analogue_pocket",      "Analogue Pocket"},
+            {Device::custom,                "custom",               "Custom"},
+        },
+        LockMode::LOCK_WHILE_RUNNING,
+        Device::switch_1_2
+    )
+    , X("<b>X Coordinate:</b>", LockMode::LOCK_WHILE_RUNNING, 0.09375, 0.0, 1.0)
+    , Y("<b>Y Coordinate:</b>", LockMode::LOCK_WHILE_RUNNING, 0.0046296296296296, 0.0, 1.0)
+    , WIDTH("<b>Width:</b>", LockMode::LOCK_WHILE_RUNNING, 0.8119791666666667, 0.0, 1.0)
+    , HEIGHT("<b>Height:</b>", LockMode::LOCK_WHILE_RUNNING, 0.9620370370370371, 0.0, 1.0)
     , m_soft_reset_timings("<font size=4><b>Soft Reset Timings:</b></font>")
     , SELECT_BUTTON_MASH0(
         "<b>Start Button Mash:</b><br>Mash select for this long after a soft reset to get to Press Start.",
@@ -50,15 +75,49 @@ GameSettings::GameSettings()
         1000, 0, 48000 //2000
     )
 {
+    PA_ADD_STATIC(m_game_device_settings);
+    PA_ADD_OPTION(DEVICE);
+    PA_ADD_OPTION(X);
+    PA_ADD_OPTION(Y);
+    PA_ADD_OPTION(WIDTH);
+    PA_ADD_OPTION(HEIGHT);
     PA_ADD_STATIC(m_soft_reset_timings);
     PA_ADD_OPTION(SELECT_BUTTON_MASH0);
     PA_ADD_OPTION(ENTER_GAME_WAIT0);
     PA_ADD_STATIC(m_shiny_audio_settings);
     PA_ADD_OPTION(SHINY_SOUND_THRESHOLD);
     PA_ADD_OPTION(SHINY_SOUND_LOW_FREQUENCY);
+
+    GameSettings::on_config_value_changed(this);
+    DEVICE.add_listener(*this);
+    X.add_listener(*this);
+    Y.add_listener(*this);
+    WIDTH.add_listener(*this);
+    HEIGHT.add_listener(*this);
 }
 
-
+void GameSettings::on_config_value_changed(void* object){
+    switch (DEVICE){
+    case Device::switch_1_2:
+        X.set(0.09375);
+        Y.set(0.0046296296296296);
+        WIDTH.set(0.8119791666666667);
+        HEIGHT.set(0.9620370370370371);
+        break;
+    case Device::gamecube_gba_player:
+        X.set(0);
+        Y.set(0);
+        WIDTH.set(0);
+        HEIGHT.set(0);
+        break;
+    default:
+        X.set(0);
+        Y.set(0);
+        WIDTH.set(0);
+        HEIGHT.set(0);
+        break;
+    }
+}
 
 
 

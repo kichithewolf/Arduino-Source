@@ -33,6 +33,7 @@ private:
     ImageFloatBox m_right_box;
     ImageFloatBox m_top_box;
     ImageFloatBox m_bottom_box;
+    ImageFloatBox m_cropped_box;
 };
 class StartMenuWatcher : public DetectorToFinder<StartMenuDetector>{
 public:
