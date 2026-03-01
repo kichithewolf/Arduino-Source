@@ -22,14 +22,14 @@ namespace NintendoSwitch{
 namespace PokemonFRLG{
 
 LoadMenuDetector::LoadMenuDetector(Color color)
-    : m_right_box(0.898, 0.751, 0.003, 0.195)
-    , m_left_box(0.854, 0.019, 0.047, 0.938)
+    : m_right_box(0.859, 0.023, 0.042, 0.925)
+    , m_left_box(0.099, 0.022, 0.046, 0.926)
     , m_save_box(0.773, 0.062, 0.047, 0.072)
 {}
 void LoadMenuDetector::make_overlays(VideoOverlaySet& items) const{
-    items.add(COLOR_RED, m_right_box);
-    items.add(COLOR_RED, m_left_box);
-    items.add(COLOR_RED, m_save_box);
+    items.add(COLOR_BLUE, m_right_box);
+    items.add(COLOR_BLUE, m_left_box);
+    items.add(COLOR_BLUE, m_save_box);
 }
 bool LoadMenuDetector::detect(const ImageViewRGB32& screen){
     ImageViewRGB32 right_image = extract_box_reference(screen, m_right_box);
